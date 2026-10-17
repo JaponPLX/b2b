@@ -146,3 +146,4 @@ python3 -m backend.pipeline.sync_service --limit 10
 - [x] **Pipeline de Ingesta & Salud Continua**: Cliente GitHub resiliente a rate-limits con ETag/304, backoff exponencial, recálculo de Health Score (0-100) y logs de auditoría.
 - [x] **Base de Datos Poblada**: Inventario funcional con **151 repositorios open-source populares** organizados por categorías funcionales con ideas de integración completas.
 - [x] **Suite de Tests Automatizada**: Cobertura con pruebas unitarias para base de datos, motor RAG, pipeline y cálculo de salud.
+

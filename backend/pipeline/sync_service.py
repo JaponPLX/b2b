@@ -4,7 +4,11 @@ Procesa repositorios en lotes priorizados, actualiza metadatos y recalcula el He
 """
 
 import sys
+import os
 import argparse
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+
 from typing import Dict, Any, List
 from backend.database import get_db_connection, upsert_repository, record_sync_log, DB_PATH
 from backend.pipeline.github_client import GitHubClient

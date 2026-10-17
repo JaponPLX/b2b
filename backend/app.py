@@ -8,7 +8,12 @@ import socketserver
 import json
 import urllib.parse
 import os
+import sys
 import mimetypes
+
+# Asegurar que la raíz del proyecto esté en el path de Python
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from typing import Dict, Any
 
 from backend.database import (

@@ -1,0 +1,60 @@
+/* Estilos globales y complementarios */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+pre::-webkit-scrollbar {
+  height: 6px;
+  width: 6px;
+}
+pre::-webkit-scrollbar-track {
+  background: #0b0f19;
+}
+pre::-webkit-scrollbar-thumb {
+  background: #1f2937;
+  border-radius: 4px;
+}
+pre::-webkit-scrollbar-thumb:hover {
+  background: #374151;
+}
+
+.repo-card {
+  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.repo-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(99, 102, 241, 0.4);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
+}
+
+#mermaid-container svg {
+  max-width: 100% !important;
+  height: auto !important;
+}
+
+.health-glow-emerald {
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.2);
+}
+.health-glow-blue {
+  box-shadow: 0 0 12px rgba(59, 130, 246, 0.2);
+}

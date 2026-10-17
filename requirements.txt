@@ -1,0 +1,9 @@
+# Dependencias del proyecto
+# El proyecto corre sin dependencias externas obligatorias utilizando la librería estándar de Python 3.10+
+# (http.server, sqlite3 con FTS5, urllib, math, json, unittest).
+
+# Paquetes opcionales para producción con ASGI / Uvicorn o LLMs externos:
+# fastapi>=0.110.0
+# uvicorn>=0.28.0
+# openai>=1.14.0
+# requests>=2.31.0

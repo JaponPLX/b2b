@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Acelerador de Integraciones Open Source | Catálogo Inteligente B2B</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Mermaid.js para diagramas de arquitectura -->
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <!-- Fuente Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+            },
+            dark: {
+              900: '#0b0f19',
+              800: '#111827',
+              700: '#1f2937',
+              600: '#374151'
+            }
+          }
+        }
+      }
+    }
+    mermaid.initialize({ startOnLoad: false, theme: 'dark', securityLevel: 'loose' });
+  </script>
+</head>
+<body class="bg-[#090d16] text-slate-100 font-sans min-h-screen flex flex-col antialiased selection:bg-indigo-500 selection:text-white">
+
+  <!-- Header / Navbar -->
+  <header class="sticky top-0 z-40 bg-[#090d16]/80 backdrop-blur-md border-b border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+        </div>
+        <div>
+          <span class="font-bold text-lg tracking-tight bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
+            NoCountry <span class="text-indigo-400 font-semibold">Integrations</span>
+          </span>
+          <span class="hidden md:inline-block ml-2 text-xs py-0.5 px-2 bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 rounded-full font-mono">
+            B2B Tech Accelerator
+          </span>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <nav class="flex items-center space-x-1 sm:space-x-2">
+        <button id="nav-catalog" onclick="switchTab('catalog')" class="nav-btn active flex items-center space-x-2 px-3 py-1.5 text-sm font-medium rounded-lg transition-all text-white bg-slate-800/80 border border-slate-700">
+          <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+          </svg>
+          <span>Catálogo</span>
+        </button>
+
+        <button id="nav-rag" onclick="switchTab('rag')" class="nav-btn flex items-center space-x-2 px-3 py-1.5 text-sm font-medium rounded-lg transition-all text-slate-400 hover:text-white hover:bg-slate-800/50">
+          <svg class="w-4 h-4 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+          </svg>
+          <span class="relative">
+            Asistente RAG
+            <span class="absolute -top-1 -right-2 flex h-2 w-2">
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+              <span class="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
+            </span>
+          </span>
+        </button>
+
+        <button id="nav-pipeline" onclick="switchTab('pipeline')" class="nav-btn flex items-center space-x-2 px-3 py-1.5 text-sm font-medium rounded-lg transition-all text-slate-400 hover:text-white hover:bg-slate-800/50">
+          <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          <span>Pipeline GitHub</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+    <!-- ==================== TAB 1: CATÁLOGO ==================== -->
+    <section id="tab-catalog" class="space-y-6">
+      
+      <!-- Hero Banner / Stats -->
+      <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-indigo-950/40 via-slate-900 to-slate-900 border border-slate-800 p-6 md:p-8">
+        <div class="absolute -right-10 -bottom-10 w-72 h-72 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div class="max-w-2xl">
+            <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight text-white">
+              Catálogo de Tecnologías Open Source Curadas
+            </h1>
+            <p class="mt-2 text-sm md:text-base text-slate-400">
+              Acelera la toma de decisiones arquitectónicas en proyectos B2B. Reemplaza herramientas SaaS propietarias por alternativas auto-hospedables con ideas de integración listas para producción.
+            </p>
+          </div>
+
+          <!-- Stats Badges -->
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 shrink-0">
+            <div class="bg-slate-800/60 border border-slate-700/60 rounded-xl p-3 text-center">
+              <span id="stat-total-repos" class="block text-2xl font-bold text-white font-mono">151</span>
+              <span class="text-xs text-slate-400 uppercase tracking-wider font-medium">Herramientas</span>
+            </div>
+            <div class="bg-slate-800/60 border border-slate-700/60 rounded-xl p-3 text-center">
+              <span id="stat-avg-health" class="block text-2xl font-bold text-emerald-400 font-mono">95%</span>
+              <span class="text-xs text-slate-400 uppercase tracking-wider font-medium">Health Score</span>
+            </div>
+            <div class="col-span-2 sm:col-span-1 bg-slate-800/60 border border-slate-700/60 rounded-xl p-3 text-center">
+              <span id="stat-saas-savings" class="block text-2xl font-bold text-indigo-400 font-mono">$32k+</span>
+              <span class="text-xs text-slate-400 uppercase tracking-wider font-medium">Ahorro SaaS /mes</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Categories Filter Badges Bar -->
+      <div class="space-y-2">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Categorías Funcionales</span>
+          <span id="active-category-label" class="text-xs text-indigo-400 font-medium">Todas</span>
+        </div>
+        <div id="category-pills" class="flex flex-wrap gap-2 pt-1 pb-2 overflow-x-auto no-scrollbar">
+        </div>
+      </div>
+
+      <!-- Search & Advanced Filter Toolbar -->
+      <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-4 shadow-sm space-y-3">
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
+          
+          <div class="md:col-span-5 relative">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+              </svg>
+            </div>
+            <input 
+              type="text" 
+              id="search-input" 
+              placeholder="Buscar por nombre, tecnología, tags (ej: realtime, auth, sql)..." 
+              class="w-full pl-9 pr-4 py-2 bg-slate-950/80 border border-slate-800 rounded-lg text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+            >
+          </div>
+
+          <div class="md:col-span-2">
+            <select id="filter-language" class="w-full py-2 px-3 bg-slate-950/80 border border-slate-800 rounded-lg text-sm text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              <option value="all">Lenguaje: Todos</option>
+            </select>
+          </div>
+
+          <div class="md:col-span-2">
+            <select id="filter-license" class="w-full py-2 px-3 bg-slate-950/80 border border-slate-800 rounded-lg text-sm text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              <option value="all">Licencia: Todas</option>
+            </select>
+          </div>
+
+          <div class="md:col-span-2">
+            <select id="filter-maintenance" class="w-full py-2 px-3 bg-slate-950/80 border border-slate-800 rounded-lg text-sm text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              <option value="all">Mantenimiento: Todos</option>
+              <option value="Excelente">Excelente (90+)</option>
+              <option value="Activo">Activo (75+)</option>
+            </select>
+          </div>
+
+          <div class="md:col-span-1 flex items-center justify-end">
+            <button onclick="resetFilters()" title="Limpiar filtros" class="p-2 text-slate-400 hover:text-white bg-slate-800/80 hover:bg-slate-700 rounded-lg transition border border-slate-700">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap items-center justify-between pt-2 border-t border-slate-800/60 text-xs text-slate-400 gap-3">
+          <div class="flex items-center space-x-2">
+            <span>Mínimo de Estrellas:</span>
+            <div id="star-filter-buttons" class="flex space-x-1">
+              <button onclick="setMinStars(0)" class="star-btn active px-2 py-0.5 rounded bg-indigo-600 text-white font-medium">Todas</button>
+              <button onclick="setMinStars(5000)" class="star-btn px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300">★ 5k+</button>
+              <button onclick="setMinStars(15000)" class="star-btn px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300">★ 15k+</button>
+              <button onclick="setMinStars(30000)" class="star-btn px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300">★ 30k+</button>
+              <button onclick="setMinStars(50000)" class="star-btn px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300">★ 50k+</button>
+            </div>
+          </div>
+
+          <div class="flex items-center space-x-2">
+            <span>Ordenar por:</span>
+            <select id="sort-select" onchange="applyFilters()" class="bg-slate-950 border border-slate-800 rounded px-2 py-1 text-slate-300 focus:outline-none">
+              <option value="stars_desc">Más populares (★ Stars)</option>
+              <option value="health_desc">Mayor Health Score</option>
+              <option value="updated_desc">Actualización reciente</option>
+              <option value="name_asc">Nombre (A - Z)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results Count -->
+      <div class="flex items-center justify-between text-xs text-slate-400">
+        <div>
+          Mostrando <span id="results-count" class="font-bold text-white">0</span> herramientas encontradas
+        </div>
+        <div class="flex items-center space-x-2">
+          <span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+          <span>Salud Excelente (&gt;90)</span>
+          <span class="inline-block w-2.5 h-2.5 rounded-full bg-blue-500 ml-2"></span>
+          <span>Activo (&gt;75)</span>
+        </div>
+      </div>
+
+      <!-- Repositories Grid -->
+      <div id="repos-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      </div>
+
+      <!-- Empty State -->
+      <div id="empty-state" class="hidden text-center py-16 border border-dashed border-slate-800 rounded-2xl">
+        <svg class="w-12 h-12 text-slate-600 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <h3 class="mt-3 text-lg font-medium text-slate-300">No se encontraron repositorios</h3>
+        <p class="text-xs text-slate-500 mt-1">Prueba cambiando los filtros o buscando otros términos técnicos.</p>
+        <button onclick="resetFilters()" class="mt-4 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold">
+          Restablecer Filtros
+        </button>
+      </div>
+
+    </section>
+
+    <!-- ==================== TAB 2: ASISTENTE CONSULTOR RAG ==================== -->
+    <section id="tab-rag" class="hidden space-y-6">
+      
+      <div class="rounded-2xl bg-gradient-to-r from-violet-950/40 via-slate-900 to-slate-900 border border-slate-800 p-6 md:p-8">
+        <div class="max-w-3xl">
+          <div class="inline-flex items-center space-x-2 px-2.5 py-1 rounded-full bg-violet-500/10 border border-violet-500/20 text-violet-300 text-xs font-mono mb-3">
+            <span>⚡ Retrieval-Augmented Generation</span>
+            <span>•</span>
+            <span>Motor de Decisión Arquitectónica</span>
+          </div>
+          <h2 class="text-2xl md:text-3xl font-extrabold text-white tracking-tight">
+            Consultor de Arquitectura B2B Inteligente
+          </h2>
+          <p class="mt-2 text-sm text-slate-400">
+            Ingresa la descripción de tu proyecto o modelo de negocio y obtén un blueprint completo: mapa de arquitectura, tecnologías open-source recomendadas y justificadas, snippets de integración y cálculo de ahorro frente a SaaS.
+          </p>
+        </div>
+      </div>
+
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-4">
+        <div>
+          <label for="rag-input" class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
+            Describe el producto o requerimiento de tu cliente
+          </label>
+          <div class="relative">
+            <textarea 
+              id="rag-input" 
+              rows="3" 
+              placeholder="Ejemplo: Estoy construyendo un e-commerce B2B de logística con tracking de flotas en tiempo real, autenticación multi-tenant y facturación recurrente..." 
+              class="w-full p-4 bg-slate-950 border border-slate-800 rounded-xl text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition"
+            ></textarea>
+            <button 
+              id="btn-generate-architecture" 
+              onclick="generateArchitecturePlan()" 
+              class="absolute right-3 bottom-3 px-4 py-2 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white rounded-lg text-xs font-semibold shadow-lg shadow-indigo-500/20 flex items-center space-x-2 transition"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+              <span>Generar Arquitectura</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-800">
+          <span class="text-xs text-slate-400 font-medium">Ejemplos rápidos:</span>
+          <button onclick="setExamplePrompt(1)" class="example-btn text-xs px-2.5 py-1 bg-slate-800/80 hover:bg-slate-700 text-slate-300 rounded-md transition">
+            🚚 E-commerce B2B Logística & Realtime
+          </button>
+          <button onclick="setExamplePrompt(2)" class="example-btn text-xs px-2.5 py-1 bg-slate-800/80 hover:bg-slate-700 text-slate-300 rounded-md transition">
+            🏥 Telemedicina con Firma Digital & Pagos
+          </button>
+          <button onclick="setExamplePrompt(3)" class="example-btn text-xs px-2.5 py-1 bg-slate-800/80 hover:bg-slate-700 text-slate-300 rounded-md transition">
+            🤖 Plataforma IA con RAG Local Privado
+          </button>
+          <button onclick="setExamplePrompt(4)" class="example-btn text-xs px-2.5 py-1 bg-slate-800/80 hover:bg-slate-700 text-slate-300 rounded-md transition">
+            📊 Analytics IoT de Alto Throughput
+          </button>
+        </div>
+      </div>
+
+      <div id="rag-loading" class="hidden text-center py-12 space-y-3">
+        <div class="inline-block w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+        <p class="text-sm text-slate-300 font-medium">Analizando requerimientos y consultando la base de conocimiento vectorial...</p>
+        <p class="text-xs text-slate-500">Extrayendo componentes, calculando compatibilidad y generando diagrama C4/Mermaid...</p>
+      </div>
+
+      <div id="rag-results" class="hidden space-y-6">
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div class="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-xl p-5">
+            <div class="flex items-center space-x-2 text-indigo-400 text-xs font-semibold uppercase tracking-wider mb-2">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span id="rag-industry-badge">Diagnóstico Arquitectónico</span>
+            </div>
+            <p id="rag-summary-text" class="text-sm text-slate-200 leading-relaxed"></p>
+            <div class="mt-4 flex items-center space-x-3">
+              <button onclick="exportBlueprintMarkdown()" class="text-xs px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded-lg border border-slate-700 flex items-center space-x-1.5 transition">
+                <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                <span>Descargar Blueprint (.md)</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="bg-gradient-to-br from-emerald-950/30 to-slate-900 border border-emerald-500/20 rounded-xl p-5 flex flex-col justify-between">
+            <div>
+              <span class="text-xs font-semibold text-emerald-400 uppercase tracking-wider">Ahorro Financiero Estimado</span>
+              <div class="mt-2 flex items-baseline space-x-2">
+                <span id="rag-monthly-savings" class="text-3xl font-extrabold text-white font-mono">$1,420</span>
+                <span class="text-xs text-slate-400">USD / mes</span>
+              </div>
+              <div class="mt-1 text-xs text-emerald-400/90 font-mono">
+                ≈ <span id="rag-annual-savings">$17,040</span> USD / año en licencias
+              </div>
+              <p class="mt-3 text-xs text-slate-400">
+                Calculado comparando con alternativas SaaS equivalentes (Auth0, Algolia, Datadog, Stripe Billing, etc.).
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-3">
+          <div class="flex items-center justify-between">
+            <h3 class="text-sm font-semibold text-white uppercase tracking-wider flex items-center space-x-2">
+              <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+              <span>Mapa de Arquitectura Recomendado</span>
+            </h3>
+            <span class="text-xs text-slate-400 font-mono">Topología de Flujo de Datos</span>
+          </div>
+
+          <div id="mermaid-container" class="bg-slate-950/80 rounded-xl p-6 border border-slate-800/80 overflow-x-auto flex justify-center">
+          </div>
+        </div>
+
+        <div class="space-y-3">
+          <h3 class="text-sm font-semibold text-white uppercase tracking-wider">
+            Componentes del Stack Justificados
+          </h3>
+          <div id="rag-stack-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          </div>
+        </div>
+
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-4">
+          <div class="flex items-center justify-between">
+            <h3 class="text-sm font-semibold text-white uppercase tracking-wider flex items-center space-x-2">
+              <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+              </svg>
+              <span>Guía de Conexión & Snippets de Interoperabilidad</span>
+            </h3>
+            <span class="text-xs text-slate-400">Cómo conectar los componentes</span>
+          </div>
+
+          <div id="rag-steps-container" class="space-y-4">
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- ==================== TAB 3: PIPELINE DE INGESTA ==================== -->
+    <section id="tab-pipeline" class="hidden space-y-6">
+      
+      <div class="rounded-2xl bg-gradient-to-r from-emerald-950/40 via-slate-900 to-slate-900 border border-slate-800 p-6 md:p-8">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div class="max-w-2xl">
+            <div class="inline-flex items-center space-x-2 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs font-mono mb-2">
+              <span>● Sincronización GitHub API</span>
+              <span>•</span>
+              <span>Rate Limit Protected</span>
+            </div>
+            <h2 class="text-2xl md:text-3xl font-extrabold text-white tracking-tight">
+              Pipeline de Ingesta & Salud Continua
+            </h2>
+            <p class="mt-2 text-sm text-slate-400">
+              Servicio de ingesta periódica por lotes con soporte de token rotation, cálculo de Health Score algorítmico, ETag HTTP y backoff exponencial con jitter para evitar saturar las APIs.
+            </p>
+          </div>
+
+          <button 
+            id="btn-sync-now" 
+            onclick="triggerManualSync()" 
+            class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-semibold shadow-lg shadow-emerald-600/20 flex items-center space-x-2 transition shrink-0"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            <span>Sincronizar Lote Ahora</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-5">
+          <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">GitHub API Quota Restante</span>
+          <div class="mt-2 flex items-baseline space-x-2">
+            <span id="pipeline-rate-limit" class="text-3xl font-extrabold text-white font-mono">60</span>
+            <span class="text-xs text-slate-400">reqs disponibles</span>
+          </div>
+          <p class="mt-2 text-xs text-slate-500">Monitoreado en headers x-ratelimit-remaining</p>
+        </div>
+
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-5">
+          <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Estrategia de Ingesta</span>
+          <div class="mt-2 text-base font-bold text-slate-200">
+            Batch con Cron & ETag
+          </div>
+          <p class="mt-2 text-xs text-slate-500">Responde con 304 Not Modified sin consumir cuota</p>
+        </div>
+
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-5">
+          <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Métricas de Salud</span>
+          <div class="mt-2 text-base font-bold text-emerald-400">
+            Algoritmo Ponderado (0-100)
+          </div>
+          <p class="mt-2 text-xs text-slate-500">Commits recientes, issue ratio, stars y licencias</p>
+        </div>
+      </div>
+
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-4">
+        <div class="flex items-center justify-between">
+          <h3 class="text-sm font-semibold text-white uppercase tracking-wider">
+            Historial de Ejecuciones de Ingesta
+          </h3>
+          <button onclick="loadSyncLogs()" class="text-xs text-indigo-400 hover:text-indigo-300 font-medium">
+            Actualizar logs
+          </button>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs text-slate-300">
+            <thead class="bg-slate-950/60 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-800">
+              <tr>
+                <th class="py-2.5 px-3">Fecha / Hora</th>
+                <th class="py-2.5 px-3">Verificados</th>
+                <th class="py-2.5 px-3">Actualizados</th>
+                <th class="py-2.5 px-3">Cuota Restante</th>
+                <th class="py-2.5 px-3">Estado</th>
+                <th class="py-2.5 px-3">Detalles</th>
+              </tr>
+            </thead>
+            <tbody id="sync-logs-tbody" class="divide-y divide-slate-800/60 font-mono">
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- Modal: Ficha Técnica Completa e Idea de Integración -->
+  <div id="repo-modal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-700/80 rounded-2xl max-w-3xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden animate-fadeIn">
+      
+      <div class="p-6 border-b border-slate-800 flex items-start justify-between bg-slate-950/40">
+        <div>
+          <div class="flex items-center space-x-3">
+            <h2 id="modal-title" class="text-xl font-bold text-white">Nombre Repo</h2>
+            <span id="modal-health-badge" class="px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono">
+              Health: 96%
+            </span>
+            <span id="modal-category" class="px-2 py-0.5 rounded-full text-xs font-medium bg-slate-800 text-slate-300">
+              Base de Datos
+            </span>
+          </div>
+          <p id="modal-fullname" class="text-xs text-slate-400 font-mono mt-1">owner/repo</p>
+        </div>
+        <button onclick="closeModal()" class="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 transition">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="p-6 overflow-y-auto space-y-6">
+        <div>
+          <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Descripción</h4>
+          <p id="modal-description" class="text-sm text-slate-200 leading-relaxed"></p>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-950/60 p-4 rounded-xl border border-slate-800 font-mono">
+          <div>
+            <span class="text-[10px] text-slate-500 uppercase block">Estrellas</span>
+            <span id="modal-stars" class="text-base font-bold text-amber-400">★ 0</span>
+          </div>
+          <div>
+            <span class="text-[10px] text-slate-500 uppercase block">Forks</span>
+            <span id="modal-forks" class="text-base font-bold text-slate-300">0</span>
+          </div>
+          <div>
+            <span class="text-[10px] text-slate-500 uppercase block">Issues Abiertos</span>
+            <span id="modal-issues" class="text-base font-bold text-slate-300">0</span>
+          </div>
+          <div>
+            <span class="text-[10px] text-slate-500 uppercase block">Licencia</span>
+            <span id="modal-license" class="text-base font-bold text-indigo-400">MIT</span>
+          </div>
+        </div>
+
+        <div class="p-4 rounded-xl bg-indigo-950/20 border border-indigo-500/20 flex items-center justify-between">
+          <div>
+            <span class="text-xs font-semibold text-indigo-300 block">Alternativa a SaaS Propietario</span>
+            <span id="modal-saas" class="text-sm text-white font-medium">Firebase / AWS Cognito</span>
+          </div>
+          <div class="text-right">
+            <span class="text-xs text-slate-400 block">Ahorro Mensual Estimado</span>
+            <span id="modal-cost-savings" class="text-base font-bold text-emerald-400 font-mono">$200 USD/mes</span>
+          </div>
+        </div>
+
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center space-x-1.5">
+              <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+              </svg>
+              <span>Patrón / Idea de Integración Sugerida</span>
+            </h4>
+            <span id="modal-integ-type" class="text-xs px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-medium">
+              Docker
+            </span>
+          </div>
+
+          <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3">
+            <div class="flex flex-wrap items-center gap-2 text-xs">
+              <span class="text-slate-400">Compatibilidad:</span>
+              <div id="modal-stack-tags" class="flex flex-wrap gap-1"></div>
+              <span class="text-slate-400 ml-2">Dificultad:</span>
+              <span id="modal-difficulty" class="font-medium text-amber-400">Fácil</span>
+            </div>
+
+            <p id="modal-integ-explanation" class="text-xs text-slate-300 leading-relaxed"></p>
+
+            <div class="relative">
+              <div class="flex items-center justify-between px-3 py-1.5 bg-slate-900 border-b border-slate-800 rounded-t-lg">
+                <span class="text-[10px] text-slate-400 font-mono">Código de Integración</span>
+                <button onclick="copySnippet()" id="btn-copy-snippet" class="text-xs text-slate-400 hover:text-white flex items-center space-x-1 transition">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                  </svg>
+                  <span>Copiar</span>
+                </button>
+              </div>
+              <pre id="modal-code-snippet" class="p-4 bg-slate-950 text-slate-200 text-xs font-mono rounded-b-lg overflow-x-auto whitespace-pre leading-relaxed border border-t-0 border-slate-800"></pre>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="p-4 border-t border-slate-800 bg-slate-950/40 flex items-center justify-between">
+        <div class="flex space-x-3">
+          <a id="modal-github-link" href="#" target="_blank" rel="noopener noreferrer" class="text-xs text-slate-300 hover:text-white flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 transition">
+            <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
+              <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
+            </svg>
+            <span>Ver en GitHub</span>
+          </a>
+          <a id="modal-docs-link" href="#" target="_blank" rel="noopener noreferrer" class="text-xs text-slate-300 hover:text-white flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+            </svg>
+            <span>Documentación</span>
+          </a>
+        </div>
+        <button onclick="closeModal()" class="px-4 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-medium transition">
+          Cerrar
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <div id="toast" class="hidden fixed bottom-6 right-6 z-50 bg-slate-900 border border-slate-700 text-white text-xs px-4 py-2.5 rounded-xl shadow-xl flex items-center space-x-2">
+    <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+    </svg>
+    <span id="toast-message">Notificación</span>
+  </div>
+
+  <footer class="mt-auto border-t border-slate-800/80 bg-slate-950/60 py-6 text-center text-xs text-slate-500">
+    <p>Simulación Laboral Abierta — NoCountry | Acelerador de Integraciones Open Source (B2B)</p>
+    <p class="mt-1 text-[11px] text-slate-600">Catálogo interactivo con motor RAG, pipeline GitHub resiliente y cálculo de Health Score algorítmico.</p>
+  </footer>
+
+  <script src="js/api.js"></script>
+  <script src="js/rag_chat.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

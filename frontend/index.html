@@ -214,17 +214,25 @@
         </div>
       </div>
 
-      <!-- Results Count -->
-      <div class="flex items-center justify-between text-xs text-slate-400">
-        <div>
-          Mostrando <span id="results-count" class="font-bold text-white">0</span> herramientas encontradas
+      <!-- Results Count & Actions -->
+      <div class="flex flex-wrap items-center justify-between text-xs text-slate-400 gap-3">
+        <div class="flex items-center space-x-4">
+          <div>
+            Mostrando <span id="results-count" class="font-bold text-white">0</span> herramientas encontradas
+          </div>
+          <div class="hidden sm:flex items-center space-x-2">
+            <span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+            <span>Salud Excelente (&gt;90)</span>
+            <span class="inline-block w-2.5 h-2.5 rounded-full bg-blue-500 ml-2"></span>
+            <span>Activo (&gt;75)</span>
+          </div>
         </div>
-        <div class="flex items-center space-x-2">
-          <span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
-          <span>Salud Excelente (&gt;90)</span>
-          <span class="inline-block w-2.5 h-2.5 rounded-full bg-blue-500 ml-2"></span>
-          <span>Activo (&gt;75)</span>
-        </div>
+        <button onclick="openAddRepoModal()" class="px-3 py-1.5 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white rounded-lg font-semibold shadow-md flex items-center space-x-1.5 transition">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+          </svg>
+          <span>+ Agregar Repo GitHub</span>
+        </button>
       </div>
 
       <!-- Repositories Grid -->
@@ -604,6 +612,145 @@
       </div>
 
     </div>
+  </div>
+
+  <!-- Modal: Agregar Repositorio en Vivo -->
+  <div id="add-repo-modal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-700/80 rounded-2xl max-w-lg w-full flex flex-col shadow-2xl overflow-hidden animate-fadeIn">
+      <div class="p-5 border-b border-slate-800 flex items-center justify-between bg-slate-950/40">
+        <div class="flex items-center space-x-2">
+          <div class="w-8 h-8 rounded-lg bg-indigo-600/20 text-indigo-400 flex items-center justify-center font-bold">
+            +
+          </div>
+          <h3 class="text-base font-bold text-white">Ingestar Nuevo Repositorio GitHub</h3>
+        </div>
+        <button onclick="closeAddRepoModal()" class="text-slate-400 hover:text-white p-1 rounded-lg">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <form onsubmit="submitAddRepo(event)" class="p-6 space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
+            Repositorio GitHub (owner/repo) *
+          </label>
+          <input 
+            type="text" 
+            id="new-repo-fullname" 
+            required
+            placeholder="ej: directus/directus, posthog/posthog, grafana/grafana" 
+            class="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-mono"
+          />
+          <p class="text-[11px] text-slate-500 mt-1">El pipeline consultará GitHub API, calculará el Health Score y creará la integración.</p>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
+            Categoría Funcional
+          </label>
+          <select id="new-repo-category" class="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <option value="Autenticación & Identidad">Autenticación & Identidad</option>
+            <option value="Base de Datos">Base de Datos</option>
+            <option value="CMS & Contenido">CMS & Contenido</option>
+            <option value="DevOps & Deploy">DevOps & Deploy</option>
+            <option value="Analytics & BI">Analytics & BI</option>
+            <option value="Search & Vector">Search & Vector</option>
+            <option value="AI & LLM Infra">AI & LLM Infra</option>
+            <option value="Pagos & Facturación">Pagos & Facturación</option>
+            <option value="Notificaciones & Email">Notificaciones & Email</option>
+            <option value="Monitoreo & Logs">Monitoreo & Logs</option>
+            <option value="Storage & Archivos">Storage & Archivos</option>
+            <option value="Seguridad & Secretos">Seguridad & Secretos</option>
+          </select>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
+              Reemplaza a (SaaS)
+            </label>
+            <input 
+              type="text" 
+              id="new-repo-saas" 
+              placeholder="ej: Contentful, Mixpanel" 
+              class="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
+              Ahorro Estimado ($/mes)
+            </label>
+            <input 
+              type="number" 
+              id="new-repo-cost" 
+              value="150"
+              min="0"
+              class="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-mono"
+            />
+          </div>
+        </div>
+
+        <div class="pt-3 border-t border-slate-800 flex justify-end space-x-2">
+          <button type="button" onclick="closeAddRepoModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-medium transition">
+            Cancelar
+          </button>
+          <button type="submit" id="btn-submit-add-repo" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-semibold shadow-md flex items-center space-x-2 transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+            <span>Analizar e Ingestar</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Comparación Lado a Lado de Repositorios -->
+  <div id="compare-modal" class="hidden fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-5xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden animate-fadeIn">
+      <div class="p-5 border-b border-slate-800 flex items-center justify-between bg-slate-950/40">
+        <div>
+          <h3 class="text-lg font-bold text-white flex items-center space-x-2">
+            <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+            <span>Comparación Técnica Lado a Lado</span>
+          </h3>
+          <p class="text-xs text-slate-400 mt-0.5">Contrasta métricas de salud, adopción, alternativas propietarias y snippets de integración.</p>
+        </div>
+        <button onclick="closeCompareModal()" class="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 transition">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <div class="p-6 overflow-y-auto">
+        <div id="compare-modal-content" class="overflow-x-auto">
+          <!-- Renderizado dinámico de la tabla de comparación -->
+        </div>
+      </div>
+
+      <div class="p-4 border-t border-slate-800 bg-slate-950/40 flex justify-end">
+        <button onclick="closeCompareModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-medium transition">
+          Cerrar Comparación
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dock Flotante Inferior de Comparación -->
+  <div id="compare-dock" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-slate-900/95 border border-indigo-500/50 backdrop-blur-md px-5 py-3 rounded-2xl shadow-2xl flex items-center space-x-4 text-xs">
+    <div class="flex items-center space-x-2">
+      <span class="w-2.5 h-2.5 rounded-full bg-indigo-400 animate-ping"></span>
+      <span class="text-slate-200 font-medium">
+        <span id="compare-count" class="font-bold text-indigo-400">0</span> herramientas seleccionadas
+      </span>
+    </div>
+    <div id="compare-pills-preview" class="hidden sm:flex items-center space-x-1.5"></div>
+    <button onclick="openCompareModal()" class="px-4 py-2 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-semibold rounded-lg shadow-md transition flex items-center space-x-1.5">
+      <span>Comparar Ahora</span>
+      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+    </button>
+    <button onclick="clearComparison()" class="text-slate-400 hover:text-white p-1.5 hover:bg-slate-800 rounded-lg transition" title="Limpiar selección">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+    </button>
   </div>
 
   <div id="toast" class="hidden fixed bottom-6 right-6 z-50 bg-slate-900 border border-slate-700 text-white text-xs px-4 py-2.5 rounded-xl shadow-xl flex items-center space-x-2">

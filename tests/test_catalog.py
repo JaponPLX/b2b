@@ -65,6 +65,18 @@ class TestCatalogDatabase(unittest.TestCase):
         self.assertGreaterEqual(stats["total_repos"], 100)
         self.assertGreater(stats["total_saas_savings"], 5000)
 
+    def test_get_repos_by_ids_comparison(self):
+        from backend.database import get_repos_by_ids
+        repos = get_repos_by_ids(["supabase", "strapi", "redis"], db_path=TEST_DB)
+        self.assertEqual(len(repos), 3)
+        ids = [r["id"] for r in repos]
+        self.assertIn("supabase", ids)
+        self.assertIn("strapi", ids)
+        self.assertIn("redis", ids)
+        for r in repos:
+            self.assertIn("integrations", r)
+            self.assertIn("health_score", r)
+
 
 if __name__ == "__main__":
     unittest.main()

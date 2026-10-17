@@ -14,7 +14,8 @@ let state = {
   sortBy: "stars_desc",
   repos: [],
   categories: [],
-  totalRepos: 0
+  totalRepos: 0,
+  selectedForCompare: []
 };
 
 let currentModalSnippet = "";
@@ -228,6 +229,7 @@ async function fetchAndRenderRepos() {
 }
 
 function renderRepoCard(repo) {
+  const isSelected = state.selectedForCompare.includes(repo.id);
   const healthBadgeClass = repo.health_score >= 90
     ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
     : "bg-blue-500/10 text-blue-400 border-blue-500/20";
@@ -237,7 +239,7 @@ function renderRepoCard(repo) {
   `).join("");
 
   return `
-    <div onclick="openModal('${repo.id}')" class="repo-card cursor-pointer bg-slate-900/90 border border-slate-800/80 rounded-2xl p-5 flex flex-col justify-between">
+    <div onclick="openModal('${repo.id}')" class="repo-card cursor-pointer bg-slate-900/90 border ${isSelected ? 'border-indigo-500 shadow-lg shadow-indigo-500/10 ring-1 ring-indigo-500' : 'border-slate-800/80'} rounded-2xl p-5 flex flex-col justify-between transition-all">
       <div>
         <div class="flex items-start justify-between gap-2">
           <div>
@@ -272,11 +274,21 @@ function renderRepoCard(repo) {
           <span>${repo.license}</span>
         </div>
 
-        ${repo.saas_alternative ? `
-          <div class="text-[11px] font-mono text-emerald-400 font-medium" title="Reemplaza a ${repo.saas_alternative}">
-            +$${repo.estimated_monthly_saas_cost}/mo
-          </div>
-        ` : ""}
+        <div class="flex items-center space-x-2">
+          ${repo.saas_alternative ? `
+            <span class="text-[11px] font-mono text-emerald-400 font-medium" title="Reemplaza a ${repo.saas_alternative}">
+              +$${repo.estimated_monthly_saas_cost}/mo
+            </span>
+          ` : ""}
+          <button 
+            type="button"
+            onclick="toggleCompare('${repo.id}', event)" 
+            title="Comparar herramienta" 
+            class="px-2 py-0.5 rounded text-[11px] font-medium transition ${isSelected ? 'bg-indigo-600 text-white' : 'bg-slate-800 hover:bg-slate-700 text-slate-300'}"
+          >
+            ${isSelected ? '✓ Comparando' : '+ Comparar'}
+          </button>
+        </div>
       </div>
     </div>
   `;
@@ -417,4 +429,253 @@ function showToast(message) {
   setTimeout(() => {
     toast.classList.add("hidden");
   }, 3500);
+}
+
+// ==================== COMPARACIÓN DE REPOSITORIOS ====================
+
+function toggleCompare(repoId, event) {
+  if (event) event.stopPropagation();
+
+  const idx = state.selectedForCompare.indexOf(repoId);
+  if (idx !== -1) {
+    state.selectedForCompare.splice(idx, 1);
+  } else {
+    if (state.selectedForCompare.length >= 4) {
+      showToast("Puedes comparar hasta 4 herramientas a la vez.");
+      return;
+    }
+    state.selectedForCompare.push(repoId);
+  }
+
+  updateCompareDock();
+  
+  // Re-renderizar tarjetas para reflejar estado seleccionado
+  const grid = document.getElementById("repos-grid");
+  if (state.repos && state.repos.length > 0) {
+    grid.innerHTML = state.repos.map(r => renderRepoCard(r)).join("");
+  }
+}
+
+function updateCompareDock() {
+  const dock = document.getElementById("compare-dock");
+  const countSpan = document.getElementById("compare-count");
+  const previewDiv = document.getElementById("compare-pills-preview");
+
+  if (state.selectedForCompare.length === 0) {
+    dock.classList.add("hidden");
+    return;
+  }
+
+  countSpan.textContent = state.selectedForCompare.length;
+  previewDiv.innerHTML = state.selectedForCompare.map(id => {
+    const r = state.repos.find(x => x.id === id);
+    const name = r ? r.name : id;
+    return `<span class="px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-mono text-[10px]">${name}</span>`;
+  }).join("");
+
+  dock.classList.remove("hidden");
+}
+
+function clearComparison() {
+  state.selectedForCompare = [];
+  updateCompareDock();
+  const grid = document.getElementById("repos-grid");
+  if (state.repos && state.repos.length > 0) {
+    grid.innerHTML = state.repos.map(r => renderRepoCard(r)).join("");
+  }
+}
+
+async function openCompareModal() {
+  if (state.selectedForCompare.length < 2) {
+    showToast("Selecciona al menos 2 herramientas para contrastar.");
+    return;
+  }
+
+  const container = document.getElementById("compare-modal-content");
+  container.innerHTML = `
+    <div class="text-center py-12">
+      <div class="inline-block w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+      <p class="text-xs text-slate-400 mt-2">Cargando métricas de comparación técnica...</p>
+    </div>
+  `;
+  document.getElementById("compare-modal").classList.remove("hidden");
+  document.body.classList.add("overflow-hidden");
+
+  try {
+    const data = await API.compareRepos(state.selectedForCompare);
+    const repos = data.items || [];
+
+    if (repos.length === 0) {
+      container.innerHTML = `<p class="text-center text-slate-400 py-6">No se pudieron cargar los datos de comparación.</p>`;
+      return;
+    }
+
+    container.innerHTML = `
+      <table class="w-full text-left text-xs text-slate-200 border-collapse">
+        <thead>
+          <tr class="border-b border-slate-800">
+            <th class="p-3 w-40 text-slate-400 font-semibold uppercase text-[10px]">Criterio</th>
+            ${repos.map(r => `
+              <th class="p-3 min-w-[200px]">
+                <div class="font-bold text-sm text-white">${r.name}</div>
+                <div class="text-[11px] text-indigo-400 font-normal">${r.category}</div>
+              </th>
+            `).join("")}
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-800/60 font-sans">
+          <tr>
+            <td class="p-3 text-slate-400 font-medium">Health Score</td>
+            ${repos.map(r => `
+              <td class="p-3">
+                <span class="px-2 py-0.5 rounded-full text-xs font-mono font-bold ${r.health_score >= 90 ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-blue-500/10 text-blue-400 border border-blue-500/20'}">
+                  ${r.health_score}% (${r.maintenance_level})
+                </span>
+              </td>
+            `).join("")}
+          </tr>
+          <tr>
+            <td class="p-3 text-slate-400 font-medium">Estrellas GitHub</td>
+            ${repos.map(r => `
+              <td class="p-3 font-mono font-bold text-amber-400">★ ${r.stars.toLocaleString()}</td>
+            `).join("")}
+          </tr>
+          <tr>
+            <td class="p-3 text-slate-400 font-medium">Lenguaje & Licencia</td>
+            ${repos.map(r => `
+              <td class="p-3 font-mono text-slate-300">${r.language} • <span class="text-indigo-400">${r.license}</span></td>
+            `).join("")}
+          </tr>
+          <tr>
+            <td class="p-3 text-slate-400 font-medium">Alternativa SaaS</td>
+            ${repos.map(r => `
+              <td class="p-3 text-slate-300">${r.saas_alternative || "Propietario"}</td>
+            `).join("")}
+          </tr>
+          <tr>
+            <td class="p-3 text-slate-400 font-medium">Ahorro Mensual Est.</td>
+            ${repos.map(r => `
+              <td class="p-3 font-mono text-emerald-400 font-semibold">+$${r.estimated_monthly_saas_cost || 100} USD/mes</td>
+            `).join("")}
+          </tr>
+          <tr>
+            <td class="p-3 text-slate-400 font-medium">Forks / Issues</td>
+            ${repos.map(r => `
+              <td class="p-3 font-mono text-slate-400">${r.forks.toLocaleString()} forks / ${r.open_issues} issues</td>
+            `).join("")}
+          </tr>
+          <tr>
+            <td class="p-3 text-slate-400 font-medium">Patrón Integración</td>
+            ${repos.map(r => `
+              <td class="p-3">
+                <span class="px-2 py-0.5 rounded text-[10px] bg-slate-800 text-slate-300 font-mono">
+                  ${(r.integrations && r.integrations[0] && r.integrations[0].integration_type) || "SDK / REST"}
+                </span>
+              </td>
+            `).join("")}
+          </tr>
+          <tr>
+            <td class="p-3 text-slate-400 font-medium">Stack Compatible</td>
+            ${repos.map(r => {
+              const compat = (r.integrations && r.integrations[0] && r.integrations[0].stack_compatibility) || [];
+              return `
+                <td class="p-3">
+                  <div class="flex flex-wrap gap-1">
+                    ${compat.map(c => `<span class="px-1.5 py-0.5 bg-slate-950 border border-slate-800 rounded text-[10px] text-slate-400 font-mono">${c}</span>`).join("")}
+                  </div>
+                </td>
+              `;
+            }).join("")}
+          </tr>
+          <tr>
+            <td class="p-3 text-slate-400 font-medium">Enlaces</td>
+            ${repos.map(r => `
+              <td class="p-3">
+                <a href="${r.github_url}" target="_blank" rel="noopener noreferrer" class="text-indigo-400 hover:underline font-mono text-[11px] block">
+                  GitHub ↗
+                </a>
+              </td>
+            `).join("")}
+          </tr>
+        </tbody>
+      </table>
+    `;
+  } catch (err) {
+    console.error("Error comparando repos:", err);
+    container.innerHTML = `<p class="text-center text-red-400 py-6">Ocurrió un error al cargar la comparativa.</p>`;
+  }
+}
+
+function closeCompareModal() {
+  document.getElementById("compare-modal").classList.add("hidden");
+  document.body.classList.remove("overflow-hidden");
+}
+
+// ==================== INGESTIÓN DE REPOSITORIO EN VIVO ====================
+
+function openAddRepoModal() {
+  document.getElementById("add-repo-modal").classList.remove("hidden");
+  document.body.classList.add("overflow-hidden");
+  document.getElementById("new-repo-fullname").focus();
+}
+
+function closeAddRepoModal() {
+  document.getElementById("add-repo-modal").classList.add("hidden");
+  document.body.classList.remove("overflow-hidden");
+}
+
+async function submitAddRepo(event) {
+  event.preventDefault();
+  const fullName = document.getElementById("new-repo-fullname").value.trim();
+  const category = document.getElementById("new-repo-category").value;
+  const saas = document.getElementById("new-repo-saas").value.trim();
+  const cost = parseInt(document.getElementById("new-repo-cost").value) || 150;
+
+  if (!fullName || !fullName.includes("/")) {
+    showToast("Por favor ingresa un repositorio en formato owner/repo");
+    return;
+  }
+
+  const btn = document.getElementById("btn-submit-add-repo");
+  btn.disabled = true;
+  btn.classList.add("opacity-50", "cursor-not-allowed");
+  btn.innerHTML = `
+    <div class="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+    <span>Analizando GitHub...</span>
+  `;
+
+  try {
+    const res = await API.addRepo({
+      full_name: fullName,
+      category: category,
+      saas_alternative: saas,
+      estimated_monthly_saas_cost: cost
+    });
+
+    if (res.error) {
+      showToast(res.error);
+      return;
+    }
+
+    showToast(res.message || "Repositorio agregado con éxito");
+    closeAddRepoModal();
+    document.getElementById("new-repo-fullname").value = "";
+    document.getElementById("new-repo-saas").value = "";
+
+    await Promise.all([
+      loadStats(),
+      loadCategories(),
+      fetchAndRenderRepos()
+    ]);
+  } catch (err) {
+    console.error("Error al agregar repo:", err);
+    showToast("Error al conectar con el servidor para ingestar");
+  } finally {
+    btn.disabled = false;
+    btn.classList.remove("opacity-50", "cursor-not-allowed");
+    btn.innerHTML = `
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+      <span>Analizar e Ingestar</span>
+    `;
+  }
 }

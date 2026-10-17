@@ -86,6 +86,14 @@ class B2BCatalogHandler(http.server.SimpleHTTPRequestHandler):
                 "items": repos
             })
 
+        # Comparación de repositorios (debe ir antes de /api/repos/:id)
+        if path == "/api/repos/compare":
+            ids_param = query_params.get("ids", [""])[0]
+            id_list = [i.strip() for i in ids_param.split(",") if i.strip()]
+            from backend.database import get_repos_by_ids
+            repos = get_repos_by_ids(id_list)
+            return self._send_json_response({"items": repos})
+
         if path.startswith("/api/repos/"):
             repo_id = path.replace("/api/repos/", "").strip("/")
             repo = get_repo_by_id(repo_id)
@@ -102,6 +110,7 @@ class B2BCatalogHandler(http.server.SimpleHTTPRequestHandler):
         if path == "/api/stats":
             return self._send_json_response(get_stats_summary())
 
+        # 7. API: Logs de sincronización
         if path == "/api/pipeline/logs":
             return self._send_json_response(get_recent_sync_logs(limit=20))
 
@@ -122,6 +131,7 @@ class B2BCatalogHandler(http.server.SimpleHTTPRequestHandler):
         except Exception:
             payload = {}
 
+        # 1. API: Asistente Consultor de Arquitectura RAG
         if path == "/api/rag/recommend":
             prompt = payload.get("prompt", "").strip()
             if not prompt:
@@ -134,6 +144,76 @@ class B2BCatalogHandler(http.server.SimpleHTTPRequestHandler):
             recommendation = consultant.generate_recommendation(prompt)
             return self._send_json_response(recommendation)
 
+        # 2. API: Agregar nuevo repositorio en vivo
+        if path == "/api/repos/add":
+            full_name = payload.get("full_name", "").strip().lower()
+            if not full_name or "/" not in full_name:
+                return self._send_json_response({"error": "Formato inválido. Debe ser 'owner/repo' (ej: supabase/supabase)."}, status_code=400)
+
+            slug = full_name.split("/")[1]
+            from backend.pipeline.github_client import GitHubClient
+            from backend.health_score import calculate_health_score
+            from backend.database import upsert_repository, get_repo_by_id, get_db_connection
+
+            client = GitHubClient()
+            data, remaining = client.fetch_repo_data(full_name)
+            if not data:
+                return self._send_json_response({"error": f"No se pudo consultar el repositorio {full_name} en GitHub."}, status_code=404)
+
+            repo_dict = {
+                "id": slug,
+                "name": payload.get("name") or data.get("name") or slug.capitalize(),
+                "full_name": full_name,
+                "category": payload.get("category") or "DevOps & Deploy",
+                "description": data.get("description") or payload.get("description") or "Herramienta open source.",
+                "stars": data.get("stars", 1000),
+                "forks": data.get("forks", 100),
+                "open_issues": data.get("open_issues", 20),
+                "last_updated": data.get("last_updated"),
+                "license": data.get("license") or "MIT",
+                "language": data.get("language") or "TypeScript",
+                "active_maintainer": True,
+                "website_url": data.get("website_url") or f"https://github.com/{full_name}",
+                "github_url": f"https://github.com/{full_name}",
+                "docs_url": f"https://github.com/{full_name}#readme",
+                "saas_alternative": payload.get("saas_alternative") or "SaaS Propietario",
+                "estimated_monthly_saas_cost": int(payload.get("estimated_monthly_saas_cost", 120)),
+                "tags": [data.get("language", "dev").lower(), slug, "open-source"]
+            }
+
+            score, level = calculate_health_score(repo_dict)
+            repo_dict["health_score"] = score
+            repo_dict["maintenance_level"] = level
+            upsert_repository(repo_dict)
+
+            conn = get_db_connection()
+            cur = conn.cursor()
+            cur.execute("""
+            INSERT OR REPLACE INTO integrations (
+                id, repo_id, title, integration_type, stack_compatibility_json,
+                difficulty, triggers_webhooks, code_snippet, dependencies_json,
+                docs_link, explanation
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (
+                f"{slug}_integ_1",
+                slug,
+                f"Integración con {repo_dict['name']}",
+                "Docker / SDK",
+                json.dumps(["Docker", repo_dict["language"]]),
+                "Fácil",
+                "Eventos del sistema",
+                f"# Despliegue de {repo_dict['name']}\ndocker run -d --name {slug}-service -p 8080:8080 {slug}:latest",
+                json.dumps([f"{slug}-client"]),
+                repo_dict["docs_url"],
+                f"Permite desplegar e integrar {repo_dict['name']} en tu arquitectura B2B."
+            ))
+            conn.commit()
+            conn.close()
+
+            saved = get_repo_by_id(slug)
+            return self._send_json_response({"message": f"Repositorio {full_name} analizado y agregado con éxito.", "repo": saved})
+
+        # 3. API: Disparar sincronización con GitHub API
         if path == "/api/pipeline/sync":
             limit = int(payload.get("limit", 10))
             pipeline = IngestionPipeline()

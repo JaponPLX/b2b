@@ -298,6 +298,32 @@ def get_repo_by_id(repo_id: str, db_path: str = DB_PATH) -> Optional[Dict[str, A
     return repo_data
 
 
+def get_repos_by_ids(repo_ids: List[str], db_path: str = DB_PATH) -> List[Dict[str, Any]]:
+    """Obtiene múltiples repositorios para comparación lado a lado."""
+    if not repo_ids:
+        return []
+    conn = get_db_connection(db_path)
+    cur = conn.cursor()
+    placeholders = ",".join("?" for _ in repo_ids)
+    cur.execute(f"SELECT * FROM repositories WHERE id IN ({placeholders})", repo_ids)
+    rows = cur.fetchall()
+    results = []
+    for row in rows:
+        d = dict(row)
+        d["tags"] = json.loads(d.get("tags_json") or "[]")
+        # Obtener integraciones
+        cur.execute("SELECT * FROM integrations WHERE repo_id = ?", (d["id"],))
+        integs = []
+        for i_row in cur.fetchall():
+            idict = dict(i_row)
+            idict["stack_compatibility"] = json.loads(idict.get("stack_compatibility_json") or "[]")
+            integs.append(idict)
+        d["integrations"] = integs
+        results.append(d)
+    conn.close()
+    return results
+
+
 def get_categories_summary(db_path: str = DB_PATH) -> List[Dict[str, Any]]:
     conn = get_db_connection(db_path)
     cur = conn.cursor()

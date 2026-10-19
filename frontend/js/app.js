@@ -12,6 +12,7 @@ let state = {
   maintenance: "all",
   minStars: 0,
   sortBy: "stars_desc",
+  viewMode: "grid",
   repos: [],
   categories: [],
   totalRepos: 0,
@@ -55,6 +56,34 @@ function setupEventListeners() {
     state.maintenance = e.target.value;
     fetchAndRenderRepos();
   });
+
+  const paletteInput = document.getElementById("command-palette-input");
+  if (paletteInput) {
+    paletteInput.addEventListener("input", (e) => {
+      renderCommandPaletteResults(e.target.value);
+    });
+  }
+
+  window.addEventListener("keydown", (e) => {
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+      e.preventDefault();
+      const modal = document.getElementById("command-palette-modal");
+      if (modal.classList.contains("hidden")) {
+        openCommandPalette();
+      } else {
+        closeCommandPalette();
+      }
+    } else if (e.key === "/" && document.activeElement.tagName !== "INPUT" && document.activeElement.tagName !== "TEXTAREA") {
+      e.preventDefault();
+      openCommandPalette();
+    } else if (e.key === "Escape") {
+      closeCommandPalette();
+      closeModal();
+      closeCompareModal();
+      closeAddRepoModal();
+      closeMobileConnectModal();
+    }
+  });
 }
 
 function switchTab(tabId) {
@@ -62,14 +91,28 @@ function switchTab(tabId) {
   ["catalog", "rag", "pipeline"].forEach(tab => {
     const sec = document.getElementById(`tab-${tab}`);
     const btn = document.getElementById(`nav-${tab}`);
+    const mobileBtn = document.getElementById(`mobile-nav-${tab}`);
+
     if (tab === tabId) {
-      sec.classList.remove("hidden");
-      btn.classList.add("text-white", "bg-slate-800/80", "border", "border-slate-700");
-      btn.classList.remove("text-slate-400");
+      if (sec) sec.classList.remove("hidden");
+      if (btn) {
+        btn.classList.add("text-white", "bg-slate-800/80", "border", "border-slate-700");
+        btn.classList.remove("text-slate-400");
+      }
+      if (mobileBtn) {
+        mobileBtn.classList.add("text-white", "font-bold");
+        mobileBtn.classList.remove("text-slate-400");
+      }
     } else {
-      sec.classList.add("hidden");
-      btn.classList.remove("text-white", "bg-slate-800/80", "border", "border-slate-700");
-      btn.classList.add("text-slate-400");
+      if (sec) sec.classList.add("hidden");
+      if (btn) {
+        btn.classList.remove("text-white", "bg-slate-800/80", "border", "border-slate-700");
+        btn.classList.add("text-slate-400");
+      }
+      if (mobileBtn) {
+        mobileBtn.classList.remove("text-white", "font-bold");
+        mobileBtn.classList.add("text-slate-400");
+      }
     }
   });
 
@@ -211,31 +254,106 @@ async function fetchAndRenderRepos() {
     state.totalRepos = data.total;
 
     document.getElementById("results-count").textContent = data.total;
-
-    const grid = document.getElementById("repos-grid");
-    const empty = document.getElementById("empty-state");
-
-    if (data.items.length === 0) {
-      grid.innerHTML = "";
-      empty.classList.remove("hidden");
-      return;
-    }
-
-    empty.classList.add("hidden");
-    grid.innerHTML = data.items.map(r => renderRepoCard(r)).join("");
+    renderReposList();
   } catch (e) {
     console.error("Error al obtener repositorios:", e);
   }
 }
 
+function renderReposList() {
+  const grid = document.getElementById("repos-grid");
+  const tbody = document.getElementById("repos-table-tbody");
+  const empty = document.getElementById("empty-state");
+
+  if (!state.repos || state.repos.length === 0) {
+    grid.innerHTML = "";
+    tbody.innerHTML = "";
+    empty.classList.remove("hidden");
+    return;
+  }
+
+  empty.classList.add("hidden");
+  if (state.viewMode === "grid") {
+    grid.innerHTML = state.repos.map(r => renderRepoCard(r)).join("");
+  } else {
+    tbody.innerHTML = state.repos.map(r => renderRepoTableRow(r)).join("");
+  }
+}
+
+function setViewMode(mode) {
+  state.viewMode = mode;
+  const gridBtn = document.getElementById("btn-view-grid");
+  const tableBtn = document.getElementById("btn-view-table");
+  const gridContainer = document.getElementById("repos-grid");
+  const tableContainer = document.getElementById("repos-table-container");
+
+  if (mode === "grid") {
+    gridContainer.classList.remove("hidden");
+    tableContainer.classList.add("hidden");
+    gridBtn.classList.add("bg-indigo-600", "text-white");
+    gridBtn.classList.remove("text-slate-400");
+    tableBtn.classList.remove("bg-indigo-600", "text-white");
+    tableBtn.classList.add("text-slate-400");
+  } else {
+    gridContainer.classList.add("hidden");
+    tableContainer.classList.remove("hidden");
+    tableBtn.classList.add("bg-indigo-600", "text-white");
+    tableBtn.classList.remove("text-slate-400");
+    gridBtn.classList.remove("bg-indigo-600", "text-white");
+    gridBtn.classList.add("text-slate-400");
+  }
+
+  renderReposList();
+}
+
+function getLanguageDotClass(lang) {
+  const l = (lang || "").toLowerCase();
+  if (l.includes("typescript")) return "lang-typescript";
+  if (l.includes("javascript")) return "lang-javascript";
+  if (l.includes("python")) return "lang-python";
+  if (l.includes("go")) return "lang-go";
+  if (l.includes("rust")) return "lang-rust";
+  if (l.includes("c++") || l.includes("c")) return "lang-c";
+  if (l.includes("java")) return "lang-java";
+  if (l.includes("ruby")) return "lang-ruby";
+  if (l.includes("php")) return "lang-php";
+  return "lang-default";
+}
+
+function renderHealthGauge(score) {
+  const isHigh = score >= 90;
+  return `
+    <div class="relative flex items-center justify-center w-9 h-9 shrink-0" title="Health Score: ${score}%">
+      <svg class="w-9 h-9 transform -rotate-90" viewBox="0 0 36 36">
+        <path
+          class="health-ring-bg"
+          stroke-width="3"
+          stroke="currentColor"
+          fill="none"
+          d="M18 2.0845 a 14.16 14.16 0 0 1 0 28.32 a 14.16 14.16 0 0 1 0 -28.32"
+        />
+        <path
+          class="${isHigh ? 'health-ring-fill-emerald' : 'health-ring-fill-blue'}"
+          stroke-width="3"
+          stroke-dasharray="89"
+          stroke-dashoffset="${89 - (score / 100) * 89}"
+          stroke-linecap="round"
+          stroke="currentColor"
+          fill="none"
+          d="M18 2.0845 a 14.16 14.16 0 0 1 0 28.32 a 14.16 14.16 0 0 1 0 -28.32"
+        />
+      </svg>
+      <span class="absolute text-[10px] font-mono font-bold ${isHigh ? 'text-emerald-400' : 'text-blue-400'}">${score}</span>
+    </div>
+  `;
+}
+
 function renderRepoCard(repo) {
   const isSelected = state.selectedForCompare.includes(repo.id);
-  const healthBadgeClass = repo.health_score >= 90
-    ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-    : "bg-blue-500/10 text-blue-400 border-blue-500/20";
+  const langClass = getLanguageDotClass(repo.language);
 
   const tagsHtml = (repo.tags || []).slice(0, 3).map(t => `
-    <span class="px-2 py-0.5 rounded text-[10px] bg-slate-800 text-slate-400 font-mono">#${t}</span>
+    <span class="px-2 py-0.5 rounded text-[10px] bg-slate-800/80 text-slate-400 font-mono">#${t}</span>
   `).join("");
 
   return `
@@ -245,16 +363,16 @@ function renderRepoCard(repo) {
           <div>
             <div class="flex items-center space-x-2">
               <h3 class="font-bold text-base text-white group-hover:text-indigo-400 transition">${repo.name}</h3>
-              <span class="text-xs font-mono text-amber-400 font-semibold">★ ${formatStars(repo.stars)}</span>
+              <div class="flex items-center space-x-1 text-xs font-mono text-amber-400 font-semibold">
+                <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                <span>${formatStars(repo.stars)}</span>
+              </div>
             </div>
-            <span class="text-[11px] text-indigo-400 font-medium">${repo.category}</span>
+            <span class="text-[11px] text-indigo-400 font-medium font-mono">${repo.category}</span>
           </div>
 
-          <div class="flex flex-col items-end">
-            <span class="px-2 py-0.5 rounded-full text-xs font-mono font-bold border ${healthBadgeClass}">
-              ${repo.health_score}%
-            </span>
-            <span class="text-[9px] text-slate-500 mt-0.5">${repo.maintenance_level}</span>
+          <div class="flex items-center space-x-2">
+            ${renderHealthGauge(repo.health_score)}
           </div>
         </div>
 
@@ -268,9 +386,10 @@ function renderRepoCard(repo) {
       </div>
 
       <div class="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs">
-        <div class="flex items-center space-x-2 text-slate-400 font-mono text-[11px]">
+        <div class="flex items-center space-x-1.5 text-slate-400 font-mono text-[11px]">
+          <span class="lang-dot ${langClass}"></span>
           <span>${repo.language}</span>
-          <span>•</span>
+          <span class="text-slate-600">•</span>
           <span>${repo.license}</span>
         </div>
 
@@ -284,13 +403,70 @@ function renderRepoCard(repo) {
             type="button"
             onclick="toggleCompare('${repo.id}', event)" 
             title="Comparar herramienta" 
-            class="px-2 py-0.5 rounded text-[11px] font-medium transition ${isSelected ? 'bg-indigo-600 text-white' : 'bg-slate-800 hover:bg-slate-700 text-slate-300'}"
+            class="px-2 py-0.5 rounded text-[11px] font-mono transition ${isSelected ? 'bg-indigo-600 text-white' : 'bg-slate-800 hover:bg-slate-700 text-slate-300'}"
           >
-            ${isSelected ? '✓ Comparando' : '+ Comparar'}
+            ${isSelected ? 'Seleccionado' : '+ Comparar'}
           </button>
         </div>
       </div>
     </div>
+  `;
+}
+
+function renderRepoTableRow(repo) {
+  const isSelected = state.selectedForCompare.includes(repo.id);
+  const isHigh = repo.health_score >= 90;
+  const langClass = getLanguageDotClass(repo.language);
+
+  return `
+    <tr class="hover:bg-slate-950/40 transition cursor-pointer" onclick="openModal('${repo.id}')">
+      <td class="py-3 px-4">
+        <div class="font-bold text-sm text-white hover:text-indigo-400 transition">${repo.name}</div>
+        <div class="text-[11px] text-slate-500 font-mono">${repo.full_name}</div>
+      </td>
+      <td class="py-3 px-4">
+        <span class="px-2 py-0.5 rounded text-[11px] bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 font-medium font-mono">
+          ${repo.category}
+        </span>
+      </td>
+      <td class="py-3 px-4">
+        <div class="flex items-center space-x-2">
+          <div class="w-14 bg-slate-800 rounded-full h-1.5 overflow-hidden">
+            <div class="${isHigh ? 'bg-emerald-400' : 'bg-blue-400'} h-full rounded-full" style="width: ${repo.health_score}%"></div>
+          </div>
+          <span class="font-mono text-xs font-bold ${isHigh ? 'text-emerald-400' : 'text-blue-400'}">${repo.health_score}%</span>
+        </div>
+      </td>
+      <td class="py-3 px-4 font-mono text-amber-400 font-semibold">
+        <div class="flex items-center space-x-1">
+          <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+          <span>${formatStars(repo.stars)}</span>
+        </div>
+      </td>
+      <td class="py-3 px-4 font-mono text-[11px] text-slate-300">
+        <div class="flex items-center space-x-1.5">
+          <span class="lang-dot ${langClass}"></span>
+          <span>${repo.language}</span>
+          <span class="text-slate-600">•</span>
+          <span class="text-slate-400">${repo.license}</span>
+        </div>
+      </td>
+      <td class="py-3 px-4 text-xs text-slate-300">
+        ${repo.saas_alternative || "—"}
+      </td>
+      <td class="py-3 px-4 font-mono text-xs text-emerald-400 font-semibold">
+        +$${repo.estimated_monthly_saas_cost}/mo
+      </td>
+      <td class="py-3 px-4 text-right" onclick="event.stopPropagation()">
+        <button 
+          type="button"
+          onclick="toggleCompare('${repo.id}', event)" 
+          class="px-2.5 py-1 rounded text-[11px] font-mono transition ${isSelected ? 'bg-indigo-600 text-white' : 'bg-slate-800 hover:bg-slate-700 text-slate-300'}"
+        >
+          ${isSelected ? 'Seleccionado' : '+ Comparar'}
+        </button>
+      </td>
+    </tr>
   `;
 }
 
@@ -311,7 +487,7 @@ async function openModal(repoId) {
     document.getElementById("modal-category").textContent = repo.category;
     document.getElementById("modal-description").textContent = repo.description;
 
-    document.getElementById("modal-stars").textContent = `★ ${repo.stars.toLocaleString()}`;
+    document.getElementById("modal-stars").textContent = repo.stars.toLocaleString();
     document.getElementById("modal-forks").textContent = repo.forks.toLocaleString();
     document.getElementById("modal-issues").textContent = repo.open_issues.toLocaleString();
     document.getElementById("modal-license").textContent = repo.license;
@@ -537,7 +713,12 @@ async function openCompareModal() {
           <tr>
             <td class="p-3 text-slate-400 font-medium">Estrellas GitHub</td>
             ${repos.map(r => `
-              <td class="p-3 font-mono font-bold text-amber-400">★ ${r.stars.toLocaleString()}</td>
+              <td class="p-3 font-mono font-bold text-amber-400">
+                <div class="flex items-center space-x-1">
+                  <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                  <span>${r.stars.toLocaleString()}</span>
+                </div>
+              </td>
             `).join("")}
           </tr>
           <tr>
@@ -679,3 +860,172 @@ async function submitAddRepo(event) {
     `;
   }
 }
+
+// ==================== COMMAND PALETTE (CTRL+K / ⌘K) ====================
+
+function openCommandPalette() {
+  const modal = document.getElementById("command-palette-modal");
+  const input = document.getElementById("command-palette-input");
+  modal.classList.remove("hidden");
+  document.body.classList.add("overflow-hidden");
+  input.value = "";
+  input.focus();
+  renderCommandPaletteResults("");
+}
+
+function closeCommandPalette() {
+  const modal = document.getElementById("command-palette-modal");
+  modal.classList.add("hidden");
+  document.body.classList.remove("overflow-hidden");
+}
+
+function renderCommandPaletteResults(query) {
+  const resultsDiv = document.getElementById("command-palette-results");
+  const q = (query || "").toLowerCase().trim();
+
+  const quickActions = [
+    { title: "Ver Catálogo Completo", meta: "Navegación", action: () => { switchTab('catalog'); closeCommandPalette(); } },
+    { title: "Consultor de Arquitectura RAG", meta: "Blueprint", action: () => { switchTab('rag'); closeCommandPalette(); } },
+    { title: "Pipeline de Ingesta & GitHub API", meta: "Sync", action: () => { switchTab('pipeline'); closeCommandPalette(); } },
+    { title: "Ingestar Nuevo Repositorio en Vivo", meta: "Acción", action: () => { closeCommandPalette(); openAddRepoModal(); } }
+  ];
+
+  const filteredRepos = (state.repos || []).filter(r => 
+    !q || r.name.toLowerCase().includes(q) || r.category.toLowerCase().includes(q) || (r.tags && r.tags.some(t => t.toLowerCase().includes(q)))
+  ).slice(0, 8);
+
+  let html = "";
+
+  if (!q) {
+    html += `<div class="px-3 py-1.5 text-[10px] uppercase font-mono text-slate-500">Comandos Rápidos</div>`;
+    quickActions.forEach((qa, idx) => {
+      html += `
+        <div onclick="executePaletteAction(${idx})" class="p-2.5 rounded-xl hover:bg-slate-800/80 cursor-pointer flex items-center justify-between text-xs text-slate-200 transition">
+          <div class="flex items-center space-x-2.5">
+            <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+            <span class="font-medium">${qa.title}</span>
+          </div>
+          <span class="kbd-shortcut">${qa.meta}</span>
+        </div>
+      `;
+    });
+    html += `<div class="px-3 pt-3 pb-1.5 text-[10px] uppercase font-mono text-slate-500">Tecnologías Destacadas</div>`;
+  }
+
+  if (filteredRepos.length === 0 && q) {
+    resultsDiv.innerHTML = `<div class="p-6 text-center text-xs text-slate-500 font-mono">No se encontraron herramientas que coincidan con "${query}".</div>`;
+    return;
+  }
+
+  filteredRepos.forEach(r => {
+    html += `
+      <div onclick="selectPaletteRepo('${r.id}')" class="p-2.5 rounded-xl hover:bg-slate-800/80 cursor-pointer flex items-center justify-between text-xs text-slate-200 transition">
+        <div class="flex items-center space-x-3">
+          <span class="lang-dot ${getLanguageDotClass(r.language)}"></span>
+          <div>
+            <span class="font-bold text-white">${r.name}</span>
+            <span class="text-indigo-400 text-[11px] ml-2 font-mono">${r.category}</span>
+          </div>
+        </div>
+        <div class="flex items-center space-x-3 font-mono text-[11px]">
+          <span class="text-emerald-400 font-semibold">${r.health_score}%</span>
+          <span class="text-amber-400 flex items-center space-x-1">
+            <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+            <span>${formatStars(r.stars)}</span>
+          </span>
+        </div>
+      </div>
+    `;
+  });
+
+  resultsDiv.innerHTML = html;
+}
+
+function selectPaletteRepo(repoId) {
+  closeCommandPalette();
+  switchTab('catalog');
+  openModal(repoId);
+}
+
+function executePaletteAction(idx) {
+  const actions = [
+    () => { switchTab('catalog'); closeCommandPalette(); },
+    () => { switchTab('rag'); closeCommandPalette(); },
+    () => { switchTab('pipeline'); closeCommandPalette(); },
+    () => { closeCommandPalette(); openAddRepoModal(); }
+  ];
+  if (actions[idx]) actions[idx]();
+}
+
+let activeNetworkUrl = window.location.origin;
+
+async function openMobileConnectModal() {
+  const modal = document.getElementById("modal-mobile-connect");
+  if (!modal) return;
+
+  modal.classList.remove("hidden");
+  modal.classList.add("flex");
+
+  try {
+    const net = await API.getNetworkInfo();
+    activeNetworkUrl = net.network_url || window.location.origin;
+
+    const ipEl = document.getElementById("mobile-ip-display");
+    const urlEl = document.getElementById("mobile-url-display");
+    const qrImg = document.getElementById("mobile-qr-img");
+
+    if (ipEl) ipEl.textContent = net.local_ip || window.location.hostname;
+    if (urlEl) urlEl.textContent = activeNetworkUrl;
+
+    if (qrImg) {
+      // Use clean lightweight QR code generator
+      qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&format=svg&data=${encodeURIComponent(activeNetworkUrl)}`;
+    }
+  } catch (e) {
+    console.warn("Error cargando info de red:", e);
+  }
+}
+
+function closeMobileConnectModal() {
+  const modal = document.getElementById("modal-mobile-connect");
+  if (!modal) return;
+  modal.classList.add("hidden");
+  modal.classList.remove("flex");
+}
+
+function copyMobileUrl() {
+  if (!navigator.clipboard) {
+    showToast(`URL: ${activeNetworkUrl}`);
+    return;
+  }
+  navigator.clipboard.writeText(activeNetworkUrl)
+    .then(() => showToast("URL móvil copiada al portapapeles"))
+    .catch(() => showToast(`URL: ${activeNetworkUrl}`));
+}
+
+function setConnectMode(mode) {
+  const btnWifi = document.getElementById("btn-mode-wifi");
+  const btnGlobal = document.getElementById("btn-mode-global");
+  const viewWifi = document.getElementById("connect-view-wifi");
+  const viewGlobal = document.getElementById("connect-view-global");
+
+  if (!btnWifi || !btnGlobal || !viewWifi || !viewGlobal) return;
+
+  if (mode === "wifi") {
+    btnWifi.classList.add("bg-indigo-600", "text-white");
+    btnWifi.classList.remove("text-slate-400");
+    btnGlobal.classList.remove("bg-indigo-600", "text-white");
+    btnGlobal.classList.add("text-slate-400");
+    viewWifi.classList.remove("hidden");
+    viewGlobal.classList.add("hidden");
+  } else {
+    btnGlobal.classList.add("bg-indigo-600", "text-white");
+    btnGlobal.classList.remove("text-slate-400");
+    btnWifi.classList.remove("bg-indigo-600", "text-white");
+    btnWifi.classList.add("text-slate-400");
+    viewGlobal.classList.remove("hidden");
+    viewWifi.classList.add("hidden");
+  }
+}
+
+

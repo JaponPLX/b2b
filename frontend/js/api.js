@@ -74,5 +74,45 @@ const API = {
   async getSyncLogs() {
     const res = await fetch("/api/pipeline/logs");
     return await res.json();
+  },
+
+  async saveBlueprint(payload) {
+    const res = await fetch("/api/blueprints", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    return await res.json();
+  },
+
+  async getBlueprints() {
+    const res = await fetch("/api/blueprints");
+    return await res.json();
+  },
+
+  async getBlueprintById(id) {
+    const res = await fetch(`/api/blueprints/${id}`);
+    return await res.json();
+  },
+
+  async deleteBlueprint(id) {
+    const res = await fetch(`/api/blueprints/${id}/delete`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" }
+    });
+    return await res.json();
+  },
+
+  async getNetworkInfo() {
+    try {
+      const res = await fetch("/api/system/network");
+      return await res.json();
+    } catch (e) {
+      return {
+        local_url: window.location.origin,
+        network_url: window.location.origin,
+        local_ip: window.location.hostname
+      };
+    }
   }
 };

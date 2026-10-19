@@ -1,20 +1,68 @@
-/* Estilos globales y complementarios */
+/* Estilos globales y complementarios - Onyx Obsidian Cyber Theme */
+
+:root {
+  --bg-deep: #05070d;
+  --bg-surface: #0b0f19;
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --accent-cyan: #06b6d4;
+  --accent-emerald: #10b981;
+  --accent-violet: #6366f1;
+}
+
+body {
+  background-color: var(--bg-deep) !important;
+  color: #f1f5f9;
+}
 
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: scale(0.97);
+    transform: scale(0.98) translateY(4px);
   }
   to {
     opacity: 1;
-    transform: scale(1);
+    transform: scale(1) translateY(0);
   }
 }
 
 .animate-fadeIn {
-  animation: fadeIn 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: fadeIn 0.16s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
+/* Technical Obsidian Grid Pattern */
+.bg-grid-pattern {
+  background-size: 28px 28px;
+  background-image: 
+    radial-gradient(circle, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+}
+
+/* Glassmorphism Panels */
+.glass-panel {
+  background: rgba(11, 15, 25, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-subtle);
+}
+
+.glass-panel:hover {
+  border-color: rgba(6, 182, 212, 0.3);
+}
+
+/* Card Hover micro-interactions */
+.repo-card {
+  background-color: rgba(11, 15, 25, 0.95) !important;
+  border-color: rgba(255, 255, 255, 0.07) !important;
+  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), 
+              border-color 0.18s ease, 
+              box-shadow 0.18s ease;
+}
+.repo-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(6, 182, 212, 0.45) !important;
+  box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.8), 0 0 1px 1px rgba(6, 182, 212, 0.25);
+}
+
+/* Scrollbars */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
@@ -23,38 +71,185 @@
   scrollbar-width: none;
 }
 
-pre::-webkit-scrollbar {
+pre::-webkit-scrollbar, .custom-scroll::-webkit-scrollbar {
   height: 6px;
   width: 6px;
 }
-pre::-webkit-scrollbar-track {
-  background: #0b0f19;
+pre::-webkit-scrollbar-track, .custom-scroll::-webkit-scrollbar-track {
+  background: #05070d;
 }
-pre::-webkit-scrollbar-thumb {
-  background: #1f2937;
+pre::-webkit-scrollbar-thumb, .custom-scroll::-webkit-scrollbar-thumb {
+  background: #1e293b;
   border-radius: 4px;
 }
-pre::-webkit-scrollbar-thumb:hover {
-  background: #374151;
+pre::-webkit-scrollbar-thumb:hover, .custom-scroll::-webkit-scrollbar-thumb:hover {
+  background: #334155;
 }
 
-.repo-card {
-  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+/* Language Dots */
+.lang-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  display: inline-block;
 }
-.repo-card:hover {
-  transform: translateY(-2px);
-  border-color: rgba(99, 102, 241, 0.4);
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
-}
+.lang-typescript { background-color: #3178c6; box-shadow: 0 0 6px rgba(49, 120, 198, 0.5); }
+.lang-javascript { background-color: #f7df1e; box-shadow: 0 0 6px rgba(247, 223, 30, 0.5); }
+.lang-python     { background-color: #38bdf8; box-shadow: 0 0 6px rgba(56, 189, 248, 0.5); }
+.lang-go         { background-color: #06b6d4; box-shadow: 0 0 6px rgba(6, 182, 212, 0.5); }
+.lang-rust       { background-color: #fb923c; box-shadow: 0 0 6px rgba(251, 146, 60, 0.5); }
+.lang-c          { background-color: #94a3b8; }
+.lang-java       { background-color: #f59e0b; }
+.lang-ruby       { background-color: #ef4444; }
+.lang-php        { background-color: #818cf8; }
+.lang-default    { background-color: #64748b; }
 
+/* Mermaid canvas */
+#mermaid-container {
+  position: relative;
+  transition: transform 0.15s ease-out;
+}
 #mermaid-container svg {
   max-width: 100% !important;
   height: auto !important;
 }
 
-.health-glow-emerald {
-  box-shadow: 0 0 12px rgba(16, 185, 129, 0.2);
+/* Circular Health Gauge */
+.health-ring-bg {
+  stroke: rgba(255, 255, 255, 0.08);
 }
-.health-glow-blue {
-  box-shadow: 0 0 12px rgba(59, 130, 246, 0.2);
+.health-ring-fill-emerald {
+  stroke: #10b981;
+  filter: drop-shadow(0 0 5px rgba(16, 185, 129, 0.5));
 }
+.health-ring-fill-blue {
+  stroke: #06b6d4;
+  filter: drop-shadow(0 0 5px rgba(6, 182, 212, 0.5));
+}
+
+/* Keyboard badge */
+.kbd-shortcut {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #94a3b8;
+}
+
+/* Blueprint Tab Active */
+.blueprint-tab.active {
+  background: rgba(99, 102, 241, 0.15);
+  border-color: rgba(99, 102, 241, 0.4);
+  color: #ffffff;
+}
+
+/* White-Label Executive Print Dossier */
+#print-dossier-area {
+  display: none;
+}
+
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 1.2cm;
+  }
+
+  html, body {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Hide screen interactive layout */
+  header,
+  main,
+  footer,
+  nav,
+  #compare-dock,
+  #toast,
+  #command-palette-modal,
+  #modal-save-blueprint,
+  #modal-saved-blueprints,
+  #modal-mobile-connect,
+  #modal-repo-detail,
+  #modal-compare,
+  .fixed {
+    display: none !important;
+  }
+
+  /* Show white-label printable report */
+  #print-dossier-area {
+    display: block !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .print-page {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    font-size: 12px;
+  }
+
+  .print-page svg {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+
+  table {
+    page-break-inside: avoid;
+  }
+
+  h1, h2, h3 {
+    page-break-after: avoid;
+  }
+}
+
+/* Mobile, Tablet & Touch Device Optimizations */
+@supports (padding: max(0px)) {
+  .pb-safe {
+    padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+  }
+  .pt-safe {
+    padding-top: max(0.5rem, env(safe-area-inset-top));
+  }
+}
+
+/* Smooth touch scrolling */
+.custom-scroll,
+.overflow-y-auto,
+.overflow-x-auto,
+#category-pills,
+#mermaid-wrapper {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+/* Prevent auto-zoom on iOS when tapping inputs */
+@media screen and (max-width: 768px) {
+  input[type="text"],
+  input[type="number"],
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* Mobile Nav Button Active State */
+.mobile-nav-btn.active {
+  color: #ffffff;
+}
+.mobile-nav-btn.active svg {
+  filter: drop-shadow(0 0 6px rgba(99, 102, 241, 0.6));
+}
+
+/* Touch action for diagram wrapper */
+#mermaid-wrapper {
+  touch-action: pan-x pan-y;
+}
+
+

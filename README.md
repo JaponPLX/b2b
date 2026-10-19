@@ -1,149 +1,188 @@
-# 🚀 Acelerador de Integraciones Open Source (B2B)
-### Simulación Laboral Abierta — NoCountry | Developer Tools / Consultoría Tech
+# Acelerador de Integraciones Open Source (B2B)
+### Simulacion Laboral Abierta — NoCountry | Developer Tools / Consultoria Tech
 
-Plataforma inteligente y catálogo interactivo de tecnologías open source curadas con **Asistente Consultor de Arquitectura mediante RAG (Retrieval-Augmented Generation)**, **Pipeline de Ingesta con GitHub API** y **Cálculo de Métricas de Salud (Health Score)**.
+Plataforma inteligente y catalogo interactivo de tecnologias open source curadas con **Asistente Consultor de Arquitectura mediante RAG (Retrieval-Augmented Generation)**, **Pipeline de Ingesta con GitHub API v3**, **Generador de Infraestructura como Codigo (docker-compose.yml)** y **Calculo Algoritmico de Metricas de Salud (Health Score)**.
 
-Diseñada para acelerar la toma de decisiones técnicas en firmas de consultoría y desarrollo de software que gestionan múltiples proyectos al año, reduciendo de **15-20 horas a minutos** la investigación y diseño de stacks tecnológicos, evitando reinventar la rueda y maximizando el ahorro frente a herramientas SaaS propietarias.
-
----
-
-## 🌟 Características Principales
-
-### 1. 📚 Catálogo Web Interactivo (150+ Repositorios Curados)
-- **Inventario Funcional Extenso**: Supera con creces el requerimiento mínimo (151 repositorios reales cargados y verificados).
-- **Categorización Funcional Completa**: Autenticación, Base de Datos & BaaS, Búsqueda & RAG, Inteligencia Artificial & LLMs, Analítica & Telemetría, Pagos & Facturación B2B, CMS Headless, Mensajería & Streaming, Automatización & Workflows, Monitoreo & Logs, Almacenamiento, DevOps & Deploy, Seguridad, etc.
-- **Buscador Avanzado & Facetas**:
-  - Búsqueda full-text en tiempo real impulsada por **SQLite FTS5** sobre nombres, descripciones, tags y lenguajes.
-  - Filtros dinámicos por **Lenguaje** (TypeScript, Python, Go, Rust, Java, etc.), **Licencia** (MIT, Apache-2.0, BSD, AGPL), **Nivel de Mantenimiento** y **Estrellas Mínimas**.
-- **Ficha Técnica & Ideas de Integración Estructuradas**:
-  - Métricas de GitHub: Estrellas, forks, issues abiertos, última actualización, mantenedor activo.
-  - Alternativa SaaS y estimación de ahorro financiero mensual.
-  - Patrón de integración estructurado con tipo (Docker, SDK, Webhook, REST, CLI), compatibilidad de stacks, nivel de dificultad, explicación paso a paso y **snippets de código listos para copiar con 1 clic**.
-
-### 2. 🧠 Asistente Consultor de Arquitectura (RAG Inteligente)
-- **Input Contextual de Negocio**: Recibe requerimientos en lenguaje natural (ej: *"Estoy construyendo un e-commerce B2B de logística con tracking de flotas en tiempo real, autenticación multi-tenant y pagos recurrentes"*).
-- **Análisis Semántico & Embeddings**: Descompone las necesidades del cliente en capacidades técnicas (Auth, DB, Search, Queues, Billing, Analytics, etc.) y realiza recuperación semántica mediante vectores TF-IDF con normalización coseno y ponderación de reputación.
-- **Entregables del Asistente**:
-  - **Diagnóstico y Resumen Ejecutivo**.
-  - **Calculadora de Ahorro de Costos vs SaaS Propietario** (ej: Ahorros estimados de más de $1,400 USD/mes / $16,800 USD/año frente a combinaciones de Auth0 + Algolia + Datadog + Firebase).
-  - **Mapa de Arquitectura Visual e Interactivo** renderizado con **Mermaid.js** en tiempo real.
-  - **Stack Desglosado y Justificado por Capas**.
-  - **Guía de Conexión e Interoperabilidad Paso a Paso** con fragmentos de código conectando los servicios entre sí.
-  - **Exportación en 1 Clic**: Descarga el blueprint completo en formato Markdown (.md) para presentar a clientes y stakeholders.
-
-### 3. 🔄 Pipeline de Ingesta & Sincronización GitHub
-- **Respeto Estricto de Rate Limits**: Lee y monitorea los encabezados `x-ratelimit-remaining` y `x-ratelimit-reset`.
-- **Caché Inteligente con ETag**: Emite peticiones condicionales con cabecera `If-None-Match` recibiendo respuestas `304 Not Modified` para no gastar cuota ni ancho de banda.
-- **Rotación de Tokens & Backoff Exponencial con Jitter**: Soporta múltiples tokens en `GITHUB_TOKEN` y reintentos ante códigos 403 / 429.
-- **Cálculo Algorítmico de Health Score (0 - 100)**:
-  - **Frescura de Commits (hasta 35 pts)**: Ponderación basada en la fecha del último commit (< 14 días: 35 pts, < 45 días: 30 pts, etc.).
-  - **Ratio de Issues Abiertos (hasta 25 pts)**: Pondera issues abiertos sobre el volumen de estrellas y forks para medir el nivel de resolución de la comunidad.
-  - **Adopción y Masa Crítica (hasta 20 pts)**: Número de estrellas y forks.
-  - **Licencia Empresarial Permisiva (hasta 10 pts)**: Puntuación máxima para MIT, Apache 2.0, BSD, ISC.
-  - **Mantenedor Activo (hasta 10 pts)**: Verificación de soporte continuado.
-- **Auditoría**: Tabla de historial de sincronizaciones con detalle de repositorios verificados, actualizados y cuota restante.
+Disenada para firmas de consultoria y equipos de ingenieria que gestionan multiples proyectos al ano, reduciendo de **15-20 horas a minutos** la investigacion y diseno de stacks tecnologicos, eliminando el vendor lock-in y maximizando el ahorro frente a herramientas SaaS propietarias.
 
 ---
 
-## 🏗️ Arquitectura del Sistema
+## Caracteristicas Principales
+
+### 1. Catalogo de Ingenieria (151+ Repositorios Curados)
+- **Inventario Funcional de Alto Rendimiento**: 151 repositorios reales verificados y clasificados en 16 categorias tecnicas.
+- **Categorias Funcionales**: Autenticacion & IAM, Base de Datos & BaaS, Busqueda & Vector, Inteligencia Artificial & LLMs, Analitica & BI, Pagos & Facturacion B2B, CMS Headless, Streaming & Colas, Automatizacion & Workflows, Monitoreo & Logs, Storage & Archivos, DevOps & Deploy, Seguridad & Secretos.
+- **Buscador Full-Text FTS5 & Facetas**:
+  - Busqueda instantanea impulsada por SQLite FTS5 sobre nombres, descripciones, tags y lenguajes.
+  - Filtros tecnicos por lenguaje principal, licencia de software, nivel de salud y volumen de estrellas.
+- **Modo de Visualizacion Dual**:
+  - **Vista Cuadricula (Cards)**: Tarjetas con tags, auras de estado y micro-anillo de salud.
+  - **Vista Tabla de Ingenieria (Data Matrix)**: Vista tabular densa para arquitectos de software con barras de salud horizontales y comparador rapido.
+- **Micro-Gauges Circulares de Salud (SVG Rings)**:
+  - Anillo de progreso circular que grafica el Health Score algoritmico (0 - 100%) con indicador esmeralda o cian.
+- **Espectro de Color por Lenguaje**:
+  - Indicadores visuales con el color oficial de cada ecosistema (TypeScript, Python, Go, Rust, JavaScript, C++, etc.).
+- **Matriz de Comparacion Lado a Lado**:
+  - Permite seleccionar hasta 4 herramientas y contrastarlas en una tabla comparativa con indicadores de adopcion, salud, alternativa SaaS, ahorro mensual y compatibilidad de stack.
+
+---
+
+### 2. Command Palette Global (Ctrl + K / Cmd + K)
+- Buscador rapido y accesible en cualquier momento presionando `Ctrl + K`, `Cmd + K` o `/`.
+- Navegacion completa por teclado (`Flecha Arriba`, `Flecha Abajo`, `Enter` para abrir la ficha tecnica, `Esc` para cerrar).
+- Acceso directo a comandos del sistema, salto entre secciones y apertura instantanea de fichas tecnicas.
+
+---
+
+### 3. Asistente Consultor de Arquitectura (RAG Inteligente)
+- **Input Contextual de Negocio**: Recibe requerimientos en lenguaje natural o mediante plantillas tecnicas preconfiguradas (`[LOGISTICS_TRACKING]`, `[HEALTH_TECH]`, `[ENTERPRISE_AI]`, `[IOT_STREAMING]`).
+- **Analisis Semantico & Vectorial**: Descompone las necesidades del cliente en capas tecnicas y recupera los componentes optimos mediante indexacion vectorial TF-IDF con ponderacion de salud y reputacion.
+- **Entregables de Consultoria**:
+  - **Diagnostico y Resumen Ejecutivo**.
+  - **Simulador de Escala de Equipo ROI**: Selector interactivo (10 devs, 50 devs, 250+ devs) que proyecta el ahorro anual en tiempo real.
+  - **Estimador de Dimensionamiento de Servidores (Cloud Sizing)**: Calcula RAM minima (GB), vCPUs, almacenamiento NVMe, costo del VPS (Hetzner Cloud / AWS EC2) y el **Margen de Ahorro Neto**.
+  - **Matriz de Cumplimiento & Seguridad (Zero Trust Ready)**: Indicadores de soberania GDPR, trazabilidad SOC 2, compatibilidad Air-Gapped y cifrado AES-256 / TLS 1.3.
+  - **Generador de Despliegue en 1 Clic**:
+    - **`docker-compose.yml` de produccion**: Ensamblado automaticamente con todos los servicios interconectados, redes privadas y volumenes persistentes.
+    - **`.env.example` unificado**: Variables de entorno listas para desplegar.
+    - **Blueprint en Markdown (.md)**: Documento completo para presentar a clientes y directores tecnicos.
+  - **Topologia de Arquitectura Mermaid Interactiva**:
+    - Controles de Zoom In (`+`), Zoom Out (`-`), Reset (`100%`) y Descarga de imagen en formato SVG vectorizado.
+
+---
+
+### 4. Conexion & Pipeline con GitHub REST API v3
+El programa **si puede conectarse con todos los repositorios publicos de GitHub**. Cuenta con un motor de conexion preparado para produccion:
+
+- **Conexion en Vivo de Cualquier Repositorio**:
+  - Mediante el boton `+ Agregar Repo GitHub`, el usuario puede ingresar cualquier repositorio del mundo (`owner/repo`, ej: `directus/directus`, `posthog/posthog`).
+  - El sistema consulta la API de GitHub en vivo, extrae metricas reales, ejecuta el calculo ponderado de salud y lo indexa inmediatamente en SQLite FTS5.
+- **Manejo de Rate Limits de GitHub**:
+  - Modo Anonimo: 60 peticiones/hora por IP.
+  - Modo Autenticado: 5,000 peticiones/hora por token (configurable via variable de entorno `GITHUB_TOKEN`).
+- **Rotacion de Tokens**:
+  - Soporta multiples tokens separados por coma (`GITHUB_TOKENS=ghp_tok1,ghp_tok2`), alternando automaticamente entre ellos para multiplicar la cuota disponible.
+- **Cache Inteligente con ETag (HTTP 304 Not Modified)**:
+  - Almacena cabeceras ETag de cada repositorio. En sincronizaciones posteriores, si el repositorio no ha cambiado, GitHub responde con HTTP 304 y **no descuenta cuota del rate limit**.
+- **Calculo Algoritmico de Health Score (0 - 100)**:
+  - **Frescura de Commits (hasta 35 pts)**: Evaluacion de dias desde el ultimo push.
+  - **Ratio de Resolucion de Issues (hasta 25 pts)**: Issues abiertos ponderados contra volumen de comunidad.
+  - **Masa Critica (hasta 20 pts)**: Estrellas y forks.
+  - **Licencia Permisiva (hasta 10 pts)**: MIT, Apache-2.0, BSD.
+  - **Mantenimiento Activo (hasta 10 pts)**: Estado del mantenedor.
+
+---
+
+### 5. Suite de Consultoria White-Label & Blueprints de Clientes
+- **Exportacion de Dossier Ejecutivo en PDF (White-Label)**:
+  - Formato editorial corporativo disenado para entregar a directores tecnicos (CTOs) y clientes empresariales.
+  - Incluye: membrete de confidencialidad, diagnostico ejecutivo, modelo financiero TCO, dimensionamiento de servidores VPS, matriz de cumplimiento Zero-Trust, topologia vectorial del sistema y firmas de conformidad cliente/consultor.
+  - Optimizado para impresion en A4 o guardado en PDF de 1 clic mediante estandares `@media print`.
+- **Persistencia de Blueprints de Clientes en SQLite**:
+  - Permite guardar propuestas tecnicas asociadas al nombre del cliente y titulo del proyecto.
+  - Cajon/Drawer de historial con listado cronologico de blueprints guardados.
+  - Carga instantanea de cualquier blueprint previo directamente en el canvas interactivo.
+- **Preparado para Despliegue Cloud en Produccion**:
+  - `Dockerfile` optimizado y ligero (Python 3.12/3.14 slim).
+  - `docker-compose.yml` para despliegue en 1 comando con volumen de persistencia `./data`.
+
+---
+
+### 6. Soporte Multi-Dispositivo & Progressive Web App (PWA)
+- **Acceso Directo desde Moviles y Tablets (iOS & Android)**:
+  - Deteccion automatica de la IP de red local (`get_local_ip()`).
+  - Al iniciar el servidor, muestra la URL exacta para abrir desde cualquier celular o tablet conectado al mismo Wi-Fi sin instalar software adicional.
+  - Boton `Acceso Movil` en el encabezado con visualizador de Codigo QR para escanear con la camara y boton de copiado rapido de URL.
+- **Barra de Navegacion Inferior para Celulares (Mobile Bottom Tab Bar)**:
+  - Diseno ergonomico para navegacion con el pulgar en pantallas tactiles (Catalogo, Consultor RAG, Pipeline y Busqueda).
+  - Soporte de areas seguras para pantallas con notch o barra de gestos (`env(safe-area-inset-bottom)`).
+- **Instalable como App (PWA)**:
+  - Archivo `manifest.json` y metadatos `apple-mobile-web-app-capable`.
+  - Icono SVG vectorial adaptable para pantalla de inicio en Android y iOS.
+  - Optimizacion anti-zoom en inputs tactiles.
+
+---
+
+## Arquitectura de Archivos
 
 ```
 b2b/
 ├── backend/
-│   ├── app.py                 # Servidor HTTP RESTful de alto rendimiento
-│   ├── database.py            # SQLite con FTS5, schema relacional y queries
-│   ├── health_score.py        # Algoritmo de puntuación de salud (0-100)
-│   ├── rag_engine.py          # Motor semántico RAG, similitud coseno y Mermaid
+│   ├── app.py                 # Servidor HTTP RESTful con socket reuse, fallback y CRUD de blueprints
+│   ├── database.py            # SQLite con FTS5, schema relacional y persistencia de blueprints
+│   ├── health_score.py        # Algoritmo de puntuacion de salud tecnica (0-100)
+│   ├── rag_engine.py          # Motor semantico RAG, generador de docker-compose, sizing y Mermaid
 │   ├── seed_data.py           # Inventario curado de 151 repositorios open-source
 │   └── pipeline/
-│       ├── github_client.py   # Cliente GitHub API con rate-limit y caché
-│       └── sync_service.py    # Servicio de ingesta por lotes y cron
+│       ├── github_client.py   # Cliente GitHub API v3 con rate-limit, ETag y rotacion de tokens
+│       └── sync_service.py    # Servicio de ingesta por lotes y auditoria
 ├── frontend/
-│   ├── index.html             # Interfaz web SPA moderna, limpia y responsiva
+│   ├── index.html             # Interfaz web SPA (Paleta Obsidian Cyber, Modales de Clientes, Print Area)
 │   ├── css/
-│   │   └── style.css          # Estilos complementarios y animaciones
+│   │   └── style.css          # Estilos Obsidian Cyber, health rings y reglas @media print White-Label
 │   └── js/
-│       ├── api.js             # Capa de comunicación REST
-│       ├── app.js             # Lógica de catálogo, filtros y modales
-│       └── rag_chat.js        # Lógica del asistente consultor RAG
+│       ├── api.js             # Capa de comunicacion RESTful con endpoints de blueprints
+│       ├── app.js             # Logica de catalogo, Command Palette (Ctrl+K), tabla de datos y modales
+│       └── rag_chat.js        # Logica del consultor RAG, guardado de proyectos e impresion de dossier
 ├── data/
-│   └── catalog.db             # Base de datos SQLite persistente
+│   └── catalog.db             # Base de datos SQLite persistente con indices FTS5 y blueprints
 ├── tests/
-│   ├── test_catalog.py        # Tests unitarios del catálogo y FTS5
-│   ├── test_health_score.py   # Tests del cálculo de salud
-│   ├── test_rag_engine.py     # Tests del motor de recomendación RAG
-│   └── test_pipeline.py       # Tests del cliente GitHub y rotación de tokens
-├── run.sh                     # Script de inicio en 1 comando
-└── README.md                  # Documentación del proyecto
+│   ├── test_catalog.py        # Tests unitarios del catalogo, FTS5 y comparacion
+│   ├── test_health_score.py   # Tests del algoritmo de salud
+│   ├── test_rag_engine.py     # Tests del motor semantico RAG y sizing
+│   ├── test_pipeline.py       # Tests del cliente GitHub y rotacion de tokens
+│   └── test_blueprints.py     # Tests de persistencia y gestion de blueprints
+├── Dockerfile                 # Imagen de contenedor ligera para despliegue en la nube
+├── docker-compose.yml         # Orquestacion para autohospedaje con volumenes persistentes
+├── .dockerignore              # Exclusion de temporales y caches para builds
+├── run.sh                     # Script de ejecucion automatizada local
+└── README.md                  # Documentacion tecnica del sistema
 ```
 
 ---
 
-## ⚡ Inicio Rápido (Quickstart)
+## Inicio Rapido
 
-### Requisitos
-- Python 3.10 o superior (compatible con Python 3.14).
-- Sin dependencias externas obligatorias: utiliza la biblioteca estándar de Python (SQLite con FTS5, HTTP server, math, json).
-
-### 1. Clonar y ejecutar en 1 comando:
+### Opcion A: Ejecucion Local (Directa)
 ```bash
+cd /home/jugador/Descargas/b2b
 ./run.sh
 ```
 
-El script inicializará y poblará la base de datos automáticamente e iniciará el servidor en:
-👉 **`http://localhost:8080`**
+El servidor detecta puertos libres e inicia el entorno en:
+**`http://localhost:8080`**
 
-### 2. Ejecutar la suite de pruebas unitarias:
+### Opcion B: Despliegue con Docker
+```bash
+cd /home/jugador/Descargas/b2b
+docker compose up -d
+```
+El contenedor compila la imagen, monta el volumen persistente en `./data` y expone el servicio en el puerto `8080`.
+
+### Pruebas Unitarias
 ```bash
 python3 -m unittest discover tests
 ```
-Resultado: **13 tests ejecutados y aprobados (100% OK)**.
-
-### 3. Ejecutar sincronización manual del pipeline:
-```bash
-python3 -m backend.pipeline.sync_service --limit 10
-```
+Resultado: **16 tests ejecutados y aprobados (100% OK)**.
 
 ---
 
-## 🔌 API Endpoints
+## Endpoints de la API REST
 
-| Método | Endpoint | Descripción |
+| Metodo | Endpoint | Descripcion |
 |---|---|---|
-| `GET` | `/api/repos` | Búsqueda full-text, filtros (categoría, lenguaje, licencia, stars) y paginación. |
-| `GET` | `/api/repos/:id` | Ficha técnica completa de un repositorio con sus ideas de integración y snippets. |
-| `GET` | `/api/categories` | Lista de categorías funcionales con conteo y promedio de salud. |
-| `GET` | `/api/filters` | Opciones disponibles para los filtros de la interfaz. |
-| `GET` | `/api/stats` | Estadísticas consolidadas (herramientas, health score promedio, ahorros SaaS). |
-| `POST` | `/api/rag/recommend` | Motor RAG: envía `{ "prompt": "descripción de negocio" }` y recibe el blueprint. |
-| `POST` | `/api/pipeline/sync` | Dispara un lote de sincronización con la API de GitHub. |
-| `GET` | `/api/pipeline/logs` | Historial de auditoría de las últimas sincronizaciones. |
-
----
-
-## 💡 Ejemplos de Consultas al Asistente RAG
-
-1. **E-Commerce B2B de Logística**:
-   - *Input*: `"Estoy construyendo un e-commerce B2B de logística con tracking de flotas en tiempo real, autenticación multi-tenant y pagos recurrentes"`
-   - *Stack Recomendado*: Keycloak (Auth OIDC) + Supabase/PostgreSQL (DB & RLS) + Meilisearch (Catálogo rápido) + RabbitMQ/BullMQ (Streaming & Colas) + Medusa/Lago (Pagos B2B) + Grafana (Dashboards) + Coolify (Deploy).
-   - *Ahorro Estimado*: **~$1,420 USD / mes** ($17,040 USD / año).
-
-2. **Telemedicina & Salud**:
-   - *Input*: `"SaaS de telemedicina con videollamadas, historias clínicas encriptadas y firma digital de consentimientos"`
-   - *Stack Recomendado*: Supabase + Documenso (Firma digital de contratos) + Cal.com (Agendamiento de citas médicas) + Novu (Notificaciones a pacientes) + MinIO (Almacenamiento cifrado de historias médicas).
-
-3. **Plataforma de Inteligencia Artificial Privada**:
-   - *Input*: `"Plataforma corporativa de IA para análisis de contratos con modelos LLM locales y búsqueda vectorial"`
-   - *Stack Recomendado*: Ollama (Inferencia privada de Llama 3) + Qdrant / ChromaDB (Base de datos vectorial) + LiteLLM (Proxy & Load balancing) + Langfuse (Observabilidad de LLMs) + Flowise (Orquestación visual).
-
----
-
-## 🏆 Cumplimiento de Entregables Simulación NoCountry
-
-- [x] **Catálogo Web Interactivo**: Interfaz responsiva con navegación por categorías funcionales, filtros avanzados (lenguaje, licencia, nivel de mantenimiento, stars) y buscador de texto instantáneo.
-- [x] **Ficha Técnica e Ideas de Integración**: Cada herramienta cuenta con métricas de salud, alternativa SaaS, tipo de integración, snippets de código ejecutables y compatibilidad de stacks.
-- [x] **Asistente Consultor de Arquitectura (RAG)**: Análisis de modelos de negocio en lenguaje natural, mapa de arquitectura interactivo (Mermaid), justificación técnica, matriz de ahorro de costos y guía paso a paso de interoperabilidad.
-- [x] **Pipeline de Ingesta & Salud Continua**: Cliente GitHub resiliente a rate-limits con ETag/304, backoff exponencial, recálculo de Health Score (0-100) y logs de auditoría.
-- [x] **Base de Datos Poblada**: Inventario funcional con **151 repositorios open-source populares** organizados por categorías funcionales con ideas de integración completas.
-- [x] **Suite de Tests Automatizada**: Cobertura con pruebas unitarias para base de datos, motor RAG, pipeline y cálculo de salud.
-
+| `GET` | `/api/repos` | Lista paginada con busqueda FTS5 y filtros |
+| `GET` | `/api/repos/:id` | Ficha tecnica e idea de integracion de un repositorio |
+| `GET` | `/api/repos/compare?ids=...` | Comparativa tecnica de multiples repositorios |
+| `POST` | `/api/repos/add` | Analiza e ingesta un nuevo repositorio de GitHub en vivo |
+| `GET` | `/api/categories` | Resumen de categorias con recuento |
+| `GET` | `/api/filters` | Opciones de filtros dinamicos |
+| `GET` | `/api/stats` | Estadisticas globales del catalogo y ahorros SaaS |
+| `POST` | `/api/rag/recommend` | Motor RAG: Blueprint, docker-compose, sizing y Mermaid |
+| `POST` | `/api/pipeline/sync` | Ejecuta lote de sincronizacion con GitHub API |
+| `GET` | `/api/pipeline/logs` | Historial de auditoria de sincronizacion |
+| `GET` | `/api/blueprints` | Lista de blueprints y proyectos de clientes guardados |
+| `POST` | `/api/blueprints` | Guarda o actualiza un blueprint de consultoria de cliente |
+| `GET` | `/api/blueprints/:id` | Detalle completo de un blueprint guardado |
+| `POST` | `/api/blueprints/:id/delete` | Elimina un blueprint de la base de datos |
+| `GET` | `/api/system/network` | IP local y URL de red para conexion desde moviles y tablets |

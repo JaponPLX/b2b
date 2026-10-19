@@ -5,6 +5,7 @@ Ofrece endpoints para búsqueda, filtros, recomendaciones RAG y sincronización 
 
 import http.server
 import socketserver
+import socket
 import json
 import urllib.parse
 import os
@@ -19,7 +20,8 @@ from typing import Dict, Any
 from backend.database import (
     init_db, seed_if_empty, get_repositories, get_repo_by_id,
     get_categories_summary, get_filter_options, get_stats_summary,
-    get_recent_sync_logs, DB_PATH
+    get_recent_sync_logs, save_blueprint, get_saved_blueprints,
+    get_saved_blueprint_by_id, delete_saved_blueprint, DB_PATH
 )
 from backend.rag_engine import ArchitecturalConsultant
 from backend.pipeline.sync_service import IngestionPipeline
@@ -113,6 +115,28 @@ class B2BCatalogHandler(http.server.SimpleHTTPRequestHandler):
         # 7. API: Logs de sincronización
         if path == "/api/pipeline/logs":
             return self._send_json_response(get_recent_sync_logs(limit=20))
+
+        # 8. API: Blueprints de consultoría guardados
+        if path == "/api/blueprints":
+            return self._send_json_response({"items": get_saved_blueprints()})
+
+        if path.startswith("/api/blueprints/"):
+            bp_id = path.replace("/api/blueprints/", "").strip("/")
+            blueprint = get_saved_blueprint_by_id(bp_id)
+            if blueprint:
+                return self._send_json_response(blueprint)
+            return self._send_json_response({"error": "Blueprint no encontrado"}, status_code=404)
+
+        # 9. API: Informacion de red para conexion desde movil/tablet
+        if path == "/api/system/network":
+            local_ip = get_local_ip()
+            port = self.server.server_address[1] if hasattr(self.server, "server_address") else 8080
+            return self._send_json_response({
+                "local_ip": local_ip,
+                "port": port,
+                "local_url": f"http://localhost:{port}",
+                "network_url": f"http://{local_ip}:{port}" if local_ip != "127.0.0.1" else f"http://localhost:{port}"
+            })
 
         if path == "/" or not os.path.exists(os.path.join(FRONTEND_DIR, path.lstrip("/"))):
             self.path = "/index.html"
@@ -220,21 +244,108 @@ class B2BCatalogHandler(http.server.SimpleHTTPRequestHandler):
             result = pipeline.run_sync_batch(limit=limit)
             return self._send_json_response(result)
 
+        # 4. API: Guardar blueprint de consultoría
+        if path == "/api/blueprints":
+            client_name = payload.get("client_name", "Cliente Confidencial")
+            project_title = payload.get("project_title", "")
+            industry = payload.get("industry", "")
+            data = payload.get("data")
+            if not data or not isinstance(data, dict):
+                return self._send_json_response({"error": "Se requiere el objeto data del blueprint."}, status_code=400)
+
+            bp_id = payload.get("id")
+            saved_id = save_blueprint(
+                client_name=client_name,
+                data=data,
+                project_title=project_title,
+                industry=industry,
+                blueprint_id=bp_id
+            )
+            return self._send_json_response({
+                "message": "Blueprint de cliente guardado con éxito",
+                "id": saved_id
+            })
+
+        # 5. API: Eliminar blueprint de consultoría
+        if path.startswith("/api/blueprints/") and path.endswith("/delete"):
+            bp_id = path.replace("/api/blueprints/", "").replace("/delete", "").strip("/")
+            success = delete_saved_blueprint(bp_id)
+            if success:
+                return self._send_json_response({"message": "Blueprint eliminado con éxito"})
+            return self._send_json_response({"error": "Blueprint no encontrado"}, status_code=404)
+
         return self._send_json_response({"error": "Endpoint no encontrado"}, status_code=404)
+
+
+class ReusableTCPServer(socketserver.TCPServer):
+    allow_reuse_address = True
+    daemon_threads = True
+
+
+def get_local_ip() -> str:
+    """Detecta la IP local de la maquina en la red local o Wi-Fi."""
+    s = None
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.settimeout(0.2)
+        s.connect(("8.8.8.8", 80))
+        return s.getsockname()[0]
+    except Exception:
+        return "127.0.0.1"
+    finally:
+        if s is not None:
+            try:
+                s.close()
+            except Exception:
+                pass
 
 
 def run_server(port: int = PORT):
     init_db()
     count = seed_if_empty()
     print(f"Base de datos lista con {count} repositorios.")
-    print(f"Servidor iniciado en http://localhost:{port}")
 
-    socketserver.TCPServer.allow_reuse_address = True
-    with socketserver.TCPServer(("", port), B2BCatalogHandler) as httpd:
+    if len(sys.argv) > 1 and sys.argv[1].isdigit():
+        port = int(sys.argv[1])
+
+    max_retries = 10
+    httpd = None
+    active_port = port
+
+    for attempt in range(max_retries):
         try:
-            httpd.serve_forever()
-        except KeyboardInterrupt:
-            print("\nServidor detenido.")
+            httpd = ReusableTCPServer(("", active_port), B2BCatalogHandler)
+            break
+        except OSError as e:
+            if e.errno == 98:  # Address already in use
+                print(f"[WARN] El puerto {active_port} esta en uso por otro proceso. Probando puerto alternativo...")
+                active_port = port + attempt + 1
+            else:
+                raise e
+
+    if not httpd:
+        print(f"[ERROR] No se pudo encontrar un puerto libre entre {port} y {port + max_retries}.")
+        print(f"        Ejecuta: fuser -k {port}/tcp para liberar el puerto.")
+        sys.exit(1)
+
+    local_ip = get_local_ip()
+    print("=" * 60)
+    print(" SERVIDOR MULTI-DISPOSITIVO INICIADO CON EXITO")
+    print("=" * 60)
+    print(f" -> Local (este equipo):        http://localhost:{active_port}")
+    if local_ip != "127.0.0.1":
+        print(f" -> Movil / Tablet / Wi-Fi:     http://{local_ip}:{active_port}")
+    print("=" * 60)
+    if active_port != port:
+        print(f" (Nota: Puerto original {port} ocupado. Usando {active_port})")
+    print(" Presiona Ctrl+C para detener.")
+
+    try:
+        httpd.serve_forever()
+    except KeyboardInterrupt:
+        print("\nServidor detenido por el usuario.")
+    finally:
+        httpd.server_close()
 
 
 if __name__ == "__main__":

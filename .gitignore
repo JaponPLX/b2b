@@ -1,0 +1,10 @@
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.env
+.ssh_key*
+bin/
+data/*.db-journal
+.pytest_cache/
+.DS_Store

@@ -5,6 +5,7 @@ Capa de persistencia SQLite con soporte FTS5 para búsqueda full-text y consulta
 import sqlite3
 import json
 import os
+import uuid
 from typing import List, Dict, Any, Optional, Tuple
 from backend.health_score import calculate_health_score
 from backend.seed_data import build_complete_catalog
@@ -73,6 +74,19 @@ def init_db(db_path: str = DB_PATH):
         rate_limit_remaining INTEGER DEFAULT 0,
         status TEXT NOT NULL,
         details TEXT
+    );
+
+    CREATE TABLE IF NOT EXISTS saved_blueprints (
+        id TEXT PRIMARY KEY,
+        client_name TEXT NOT NULL,
+        project_title TEXT DEFAULT '',
+        industry TEXT DEFAULT '',
+        query TEXT DEFAULT '',
+        total_monthly_savings INTEGER DEFAULT 0,
+        total_annual_savings INTEGER DEFAULT 0,
+        data_json TEXT NOT NULL,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        updated_at TEXT DEFAULT CURRENT_TIMESTAMP
     );
 
     CREATE VIRTUAL TABLE IF NOT EXISTS repos_fts USING fts5(
@@ -360,10 +374,10 @@ def get_filter_options(db_path: str = DB_PATH) -> Dict[str, Any]:
         "maintenance_levels": ["Excelente", "Activo", "Mantenimiento Bajo", "En Riesgo"],
         "star_ranges": [
             {"label": "Todas las estrellas", "value": 0},
-            {"label": "★ 5k+", "value": 5000},
-            {"label": "★ 15k+", "value": 15000},
-            {"label": "★ 30k+", "value": 30000},
-            {"label": "★ 50k+", "value": 50000}
+            {"label": "5k+ Stars", "value": 5000},
+            {"label": "15k+ Stars", "value": 15000},
+            {"label": "30k+ Stars", "value": 30000},
+            {"label": "50k+ Stars", "value": 50000}
         ]
     }
 
@@ -464,3 +478,96 @@ def get_recent_sync_logs(limit: int = 10, db_path: str = DB_PATH) -> List[Dict[s
     logs = [dict(r) for r in cur.fetchall()]
     conn.close()
     return logs
+
+
+def save_blueprint(
+    client_name: str,
+    data: Dict[str, Any],
+    project_title: str = "",
+    industry: str = "",
+    blueprint_id: Optional[str] = None,
+    db_path: str = DB_PATH
+) -> str:
+    """Guarda o actualiza un blueprint de consultoría de cliente."""
+    conn = get_db_connection(db_path)
+    cur = conn.cursor()
+
+    bp_id = blueprint_id or f"bp_{uuid.uuid4().hex[:10]}"
+    client = client_name.strip() or "Cliente Confidencial"
+    title = project_title.strip() or f"Arquitectura {data.get('industry', 'Cloud')}"
+    ind = industry.strip() or data.get("industry", "Tecnología / SaaS")
+    query = data.get("query", "")
+    monthly = int(data.get("total_monthly_savings_usd", 0))
+    annual = int(data.get("total_annual_savings_usd", monthly * 12))
+    data_json = json.dumps(data)
+
+    cur.execute("""
+    INSERT INTO saved_blueprints (
+        id, client_name, project_title, industry, query,
+        total_monthly_savings, total_annual_savings, data_json, updated_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+    ON CONFLICT(id) DO UPDATE SET
+        client_name = excluded.client_name,
+        project_title = excluded.project_title,
+        industry = excluded.industry,
+        query = excluded.query,
+        total_monthly_savings = excluded.total_monthly_savings,
+        total_annual_savings = excluded.total_annual_savings,
+        data_json = excluded.data_json,
+        updated_at = CURRENT_TIMESTAMP
+    """, (bp_id, client, title, ind, query, monthly, annual, data_json))
+
+    conn.commit()
+    conn.close()
+    return bp_id
+
+
+def get_saved_blueprints(limit: int = 50, db_path: str = DB_PATH) -> List[Dict[str, Any]]:
+    """Retorna la lista de blueprints guardados ordenados cronológicamente."""
+    conn = get_db_connection(db_path)
+    cur = conn.cursor()
+    cur.execute("""
+    SELECT id, client_name, project_title, industry, query,
+           total_monthly_savings, total_annual_savings, created_at, updated_at
+    FROM saved_blueprints
+    ORDER BY created_at DESC
+    LIMIT ?
+    """, (limit,))
+    rows = [dict(r) for r in cur.fetchall()]
+    conn.close()
+    return rows
+
+
+def get_saved_blueprint_by_id(blueprint_id: str, db_path: str = DB_PATH) -> Optional[Dict[str, Any]]:
+    """Retorna un blueprint con sus datos completos."""
+    conn = get_db_connection(db_path)
+    cur = conn.cursor()
+    cur.execute("""
+    SELECT id, client_name, project_title, industry, query,
+           total_monthly_savings, total_annual_savings, data_json, created_at, updated_at
+    FROM saved_blueprints
+    WHERE id = ?
+    """, (blueprint_id,))
+    row = cur.fetchone()
+    conn.close()
+    if not row:
+        return None
+    res = dict(row)
+    try:
+        res["data"] = json.loads(res["data_json"])
+    except Exception:
+        res["data"] = {}
+    del res["data_json"]
+    return res
+
+
+def delete_saved_blueprint(blueprint_id: str, db_path: str = DB_PATH) -> bool:
+    """Elimina un blueprint guardado."""
+    conn = get_db_connection(db_path)
+    cur = conn.cursor()
+    cur.execute("DELETE FROM saved_blueprints WHERE id = ?", (blueprint_id,))
+    deleted = cur.rowcount > 0
+    conn.commit()
+    conn.close()
+    return deleted
+
